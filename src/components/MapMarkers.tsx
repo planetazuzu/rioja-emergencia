@@ -30,33 +30,52 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
   isLayerVisible,
   getFilteredAmbulances,
 }) => {
+  console.log('MapMarkers render:', {
+    ambulancesCount: ambulances.length,
+    helicopter: helicopter?.name,
+    evacuationPointsCount: evacuationPoints.length,
+    currentEmergency: currentEmergency?.id,
+    visibleLayers: {
+      ambulances: isLayerVisible('ambulances'),
+      helicopter: isLayerVisible('helicopter'),
+      evacuation_points: isLayerVisible('evacuation_points'),
+      incidents: isLayerVisible('incidents')
+    }
+  });
+
   const getAmbulanceColor = (ambulance: Ambulance) => {
     if (!ambulance.available) return 'bg-gray-400';
-    return ambulance.type === 'SVA' ? 'bg-red-500' : 'bg-green-500'; // Rojo para SVA, Verde para SVB
+    return ambulance.type === 'SVA' ? 'bg-red-500' : 'bg-green-500';
   };
+
+  const filteredAmbulances = getFilteredAmbulances();
+  console.log('Filtered ambulances:', filteredAmbulances);
 
   return (
     <>
       {/* Ambulancias */}
-      {isLayerVisible('ambulances') && getFilteredAmbulances().map(ambulance => (
-        <Marker 
-          key={ambulance.id}
-          position={[ambulance.lat, ambulance.lng]}
-          icon={createDivIcon(
-            <div className={`p-2 rounded-full ${getAmbulanceColor(ambulance)} shadow-lg border-2 border-white`}>
-              <AmbulanceIcon className="h-5 w-5 text-white" />
-            </div>
-          )}
-        >
-          <Popup>
-            <b>{ambulance.name}</b> ({ambulance.type})<br />
-            Base: {ambulance.base}<br />
-            Estado: {ambulance.available ? 'Disponible' : 'No disponible'}<br />
-            <span className={`inline-block w-3 h-3 rounded-full mr-1 ${ambulance.type === 'SVA' ? 'bg-red-500' : 'bg-green-500'}`}></span>
-            {ambulance.type === 'SVA' ? 'Soporte Vital Avanzado' : 'Soporte Vital Básico'}
-          </Popup>
-        </Marker>
-      ))}
+      {isLayerVisible('ambulances') && filteredAmbulances.map(ambulance => {
+        console.log('Rendering ambulance:', ambulance.name, ambulance.lat, ambulance.lng);
+        return (
+          <Marker 
+            key={ambulance.id}
+            position={[ambulance.lat, ambulance.lng]}
+            icon={createDivIcon(
+              <div className={`p-2 rounded-full ${getAmbulanceColor(ambulance)} shadow-lg border-2 border-white`}>
+                <AmbulanceIcon className="h-5 w-5 text-white" />
+              </div>
+            )}
+          >
+            <Popup>
+              <b>{ambulance.name}</b> ({ambulance.type})<br />
+              Base: {ambulance.base}<br />
+              Estado: {ambulance.available ? 'Disponible' : 'No disponible'}<br />
+              <span className={`inline-block w-3 h-3 rounded-full mr-1 ${ambulance.type === 'SVA' ? 'bg-red-500' : 'bg-green-500'}`}></span>
+              {ambulance.type === 'SVA' ? 'Soporte Vital Avanzado' : 'Soporte Vital Básico'}
+            </Popup>
+          </Marker>
+        );
+      })}
 
       {/* Helicóptero */}
       {isLayerVisible('helicopter') && helicopter && (
