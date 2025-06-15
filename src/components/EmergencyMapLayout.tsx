@@ -38,7 +38,7 @@ export const EmergencyMapLayout = ({
   getFilteredAmbulances,
 }) => {
   return (
-    <div className="w-full h-screen overflow-hidden">
+    <div className="w-full h-screen">
       <SidebarProvider>
         <div className="flex w-full h-full">
           <MapControls
@@ -58,22 +58,21 @@ export const EmergencyMapLayout = ({
             collapsible="offcanvas"
           />
           
-          <SidebarInset className="flex-1 flex flex-col">
-            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-background">
+          <SidebarInset className="flex-1">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
               <SidebarTrigger className="-ml-1" />
               <div className="text-lg font-semibold">Mapa de Emergencias</div>
             </header>
             
-            <div className="flex-1 relative">
+            <div className="flex-1 h-[calc(100vh-4rem)]">
               <MapContainer
                 center={[42.4627, -2.4450]}
                 zoom={10}
                 style={{
                   height: "100%",
                   width: "100%",
-                  cursor: 'grab',
                 }}
-                scrollWheelZoom
+                scrollWheelZoom={true}
                 zoomControl={false}
                 className="leaflet-container"
               >
@@ -82,6 +81,7 @@ export const EmergencyMapLayout = ({
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 <ZoomControl position="topright" />
+                
                 <MapClickHandler onMapClick={handleEmergencyClick} />
 
                 <MapMarkers
@@ -93,11 +93,13 @@ export const EmergencyMapLayout = ({
                   isLayerVisible={isLayerVisible}
                   getFilteredAmbulances={getFilteredAmbulances}
                 />
+                
                 <MapCoverageCircles
                   ambulances={ambulances}
                   showCoverage={isLayerVisible('coverage_zones')}
                   getFilteredAmbulances={getFilteredAmbulances}
                 />
+                
                 <MapRoutes
                   currentEmergency={currentEmergency}
                   ambulances={ambulances}

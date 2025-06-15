@@ -15,12 +15,6 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
 } from "@/components/ui/sidebar";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 
 interface MapControlsProps {
   currentEmergency: Emergency | null;
@@ -53,13 +47,13 @@ export const MapControls: React.FC<MapControlsProps> = ({
   onToggleFilters,
   onAmbulanceFilterChange,
   onAssignResource,
-  collapsible,
+  collapsible = "offcanvas",
 }) => {
   const { isInstallable, installApp } = usePWAInstall();
 
   return (
     <Sidebar collapsible={collapsible}>
-      <SidebarHeader className="p-4 border-b border-gray-200">
+      <SidebarHeader className="p-4 border-b">
         <h1 className="text-xl font-bold text-emergency-red flex items-center gap-2">
           <AlertTriangle className="h-6 w-6" />
           Emergencias La Rioja
@@ -109,7 +103,7 @@ export const MapControls: React.FC<MapControlsProps> = ({
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <div className="px-2">
+        <div className="px-2 space-y-4">
           <EmergencyInfo
             currentEmergency={currentEmergency}
             nearestEvacuationPoint={nearestEvacuationPoint}
