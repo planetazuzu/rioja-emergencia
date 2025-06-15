@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
 import "leaflet/dist/leaflet.css";
@@ -158,7 +157,7 @@ const EmergencyMap: React.FC = () => {
       />
 
       {/* Mapa principal */}
-      <div className="flex-1 p-4 relative">
+      <div className="flex-1 p-4 relative min-h-0">
         <MapContainer 
           center={[42.4627, -2.4450]} 
           zoom={10}
