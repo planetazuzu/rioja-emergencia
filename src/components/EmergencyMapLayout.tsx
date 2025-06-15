@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
 import { AddEvacuationPointDialog } from './AddEvacuationPointDialog';
@@ -6,7 +7,10 @@ import { MapMarkers } from './MapMarkers';
 import { MapClickHandler } from './MapClickHandler';
 import MapRoutes from './MapRoutes';
 import MapCoverageCircles from './MapCoverageCircles';
-import { SidebarProvider } from "@/components/ui/sidebar";
+import {
+  SidebarProvider,
+  SidebarRail
+} from "@/components/ui/sidebar";
 import { initializeLeafletIcons } from '../utils/mapUtils';
 
 initializeLeafletIcons();
@@ -34,23 +38,29 @@ export const EmergencyMapLayout = ({
 }) => {
   return (
     <SidebarProvider>
-      <div className="flex flex-col lg:flex-row w-full h-full bg-gray-50">
-        <MapControls
-          currentEmergency={currentEmergency}
-          nearestEvacuationPoint={nearestEvacuationPoint}
-          etas={etas}
-          ambulances={ambulances}
-          helicopter={helicopter}
-          mapLayers={mapLayers}
-          showFilters={showFilters}
-          ambulanceFilter={ambulanceFilter}
-          onAddPointClick={() => setIsAddPointDialogOpen(true)}
-          onToggleLayer={toggleLayer}
-          onToggleFilters={() => setShowFilters((prev: boolean) => !prev)}
-          onAmbulanceFilterChange={setAmbulanceFilter}
-          onAssignResource={handleAssignResource}
-        />
-        {/* Contenedor con clase extra para forzar el alto en móvil */}
+      <div className="flex flex-col lg:flex-row w-full h-full bg-gray-50 map-full-height-fix">
+        {/* Sidebar colapsable con rail */}
+        <div className="relative z-[10]">
+          <MapControls
+            currentEmergency={currentEmergency}
+            nearestEvacuationPoint={nearestEvacuationPoint}
+            etas={etas}
+            ambulances={ambulances}
+            helicopter={helicopter}
+            mapLayers={mapLayers}
+            showFilters={showFilters}
+            ambulanceFilter={ambulanceFilter}
+            onAddPointClick={() => setIsAddPointDialogOpen(true)}
+            onToggleLayer={toggleLayer}
+            onToggleFilters={() => setShowFilters((prev: boolean) => !prev)}
+            onAmbulanceFilterChange={setAmbulanceFilter}
+            onAssignResource={handleAssignResource}
+            collapsible="icon"
+          />
+          {/* La pestañita para colapsar/expandir sidebar */}
+          <SidebarRail />
+        </div>
+        {/* Mapa con altura forzada */}
         <div className="flex-1 min-w-0 min-h-0 relative h-full force-map-fullheight">
           <MapContainer 
             center={[42.4627, -2.4450]} 
@@ -96,13 +106,21 @@ export const EmergencyMapLayout = ({
           </div>
         </div>
       </div>
-      {/* Inyectar CSS para asegurar la altura del mapa */}
+      {/* Inyectar CSS global para altura 100% en toda la jerarquía (Vite/some templates lo requieren) */}
       <style>
         {`
+          html, body, #root {
+            height: 100%;
+          }
+          .map-full-height-fix {
+            min-height: 100dvh !important;
+            height: 100dvh !important;
+            min-height: 100vh !important;
+            height: 100vh !important;
+          }
           .force-map-fullheight {
             min-height: 100dvh !important;
             height: 100dvh !important;
-            /* fallback for older devices */
             min-height: 100vh !important;
             height: 100vh !important;
           }
