@@ -30,6 +30,7 @@ interface MapControlsProps {
   onToggleFilters: () => void;
   onAmbulanceFilterChange: (filter: 'all' | 'SVB' | 'SVA' | 'available') => void;
   onAssignResource: (resourceId: string) => void;
+  onClearEmergency: () => void;
   collapsible?: "icon" | "offcanvas" | "none";
 }
 
@@ -47,6 +48,7 @@ export const MapControls: React.FC<MapControlsProps> = ({
   onToggleFilters,
   onAmbulanceFilterChange,
   onAssignResource,
+  onClearEmergency,
   collapsible = "offcanvas",
 }) => {
   const { isInstallable, installApp } = usePWAInstall();
@@ -107,6 +109,7 @@ export const MapControls: React.FC<MapControlsProps> = ({
           <EmergencyInfo
             currentEmergency={currentEmergency}
             nearestEvacuationPoint={nearestEvacuationPoint}
+            onClearEmergency={onClearEmergency}
           />
 
           <ETAList

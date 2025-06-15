@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { findNearestEvacuationPoint, calculateAllETAs } from '../utils/calculations';
 import { useToast } from "@/components/ui/use-toast";
@@ -89,6 +88,33 @@ export function useEmergencyMapState() {
     });
   };
 
+  const clearEmergency = () => {
+    if (!currentEmergency) return;
+
+    const assignedResourceIds = currentEmergency.assignedResources;
+
+    if (assignedResourceIds.length > 0) {
+      const updatedAmbulances = ambulances.map(amb =>
+        assignedResourceIds.includes(amb.id) ? { ...amb, available: true } : amb
+      );
+      updateAmbulances(updatedAmbulances);
+  
+      if (helicopter && assignedResourceIds.includes(helicopter.id)) {
+        const updatedHelicopter = { ...helicopter, available: true };
+        updateHelicopter(updatedHelicopter);
+      }
+    }
+    
+    setCurrentEmergency(null);
+    setNearestEvacuationPoint(null);
+    setEtas([]);
+
+    toast({
+      title: "Emergencia finalizada",
+      description: "La emergencia ha sido cerrada y los recursos liberados.",
+    });
+  };
+
   const toggleLayer = (layerId) => {
     setMapLayers(prev => 
       prev.map(layer => 
@@ -131,6 +157,7 @@ export function useEmergencyMapState() {
     setIsAddPointDialogOpen,
     handleEmergencyClick,
     handleAssignResource,
+    clearEmergency,
     toggleLayer,
     setShowFilters,
     setAmbulanceFilter,

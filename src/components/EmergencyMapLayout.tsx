@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -30,6 +31,7 @@ export const EmergencyMapLayout = ({
   setIsAddPointDialogOpen,
   handleEmergencyClick,
   handleAssignResource,
+  clearEmergency,
   toggleLayer,
   setShowFilters,
   setAmbulanceFilter,
@@ -54,6 +56,7 @@ export const EmergencyMapLayout = ({
           onToggleFilters={() => setShowFilters((prev: boolean) => !prev)}
           onAmbulanceFilterChange={setAmbulanceFilter}
           onAssignResource={handleAssignResource}
+          onClearEmergency={clearEmergency}
           collapsible="offcanvas"
         />
         
