@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,7 +14,6 @@ import {
 import { EvacuationPoint } from '../types/emergency';
 import { toast } from '@/components/ui/use-toast';
 import { EvacuationPointForm, evacuationPointFormSchema } from './EvacuationPointForm';
-import { ActionChoiceModal } from './ActionChoiceModal';
 import { submitProposal, EvacPointWithContact } from '../services/evacuationPointService';
 
 type LocalEvacPoint = Omit<EvacuationPoint, 'id' | 'status' | 'restrictions'> & {
@@ -37,8 +35,6 @@ interface AddEvacuationPointDialogProps {
 export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> = ({ open, onOpenChange, onSave }) => {
   const [photos, setPhotos] = useState<string[]>([]);
   const [borradores, setBorradores] = useState<LocalEvacPoint[]>([]);
-  const [actionModal, setActionModal] = useState(false);
-  const [pendingData, setPendingData] = useState<EvacPointWithContact | null>(null);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
 
@@ -103,6 +99,7 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
       if (quitarLocalId) {
         eliminarBorrador(quitarLocalId);
       }
+      resetAll();
     } catch (err) {
       toast({
         variant: "destructive",
@@ -133,9 +130,8 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
     }
   };
 
-  const onSubmit = (values: z.infer<typeof evacuationPointFormSchema>) => {
-    setFormError("");
-    const pointData: EvacPointWithContact = {
+  const createPointData = (values: z.infer<typeof evacuationPointFormSchema>): EvacPointWithContact => {
+    return {
       name: values.name,
       locality: values.locality,
       lat: values.lat,
@@ -149,37 +145,39 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
       email: values.email,
       phone: values.phone,
     };
-    setPendingData(pointData);
-    setActionModal(true);
+  };
+
+  const handleSaveToDevice = (values: z.infer<typeof evacuationPointFormSchema>) => {
+    setFormError("");
+    const pointData = createPointData(values);
+    guardarBorrador(pointData);
+    resetAll();
+  };
+
+  const handleShareForReview = async (values: z.infer<typeof evacuationPointFormSchema>) => {
+    setFormError("");
+    const pointData = createPointData(values);
+
+    if (
+      (!pointData.email || pointData.email.trim() === "") &&
+      (!pointData.phone || pointData.phone.trim() === "")
+    ) {
+      setFormError("Para compartir para revisión, por favor indica al menos un correo electrónico o teléfono de contacto.");
+      return;
+    }
+    
+    await enviarPropuesta(pointData);
   };
   
   const resetAll = () => {
     form.reset();
     setPhotos([]);
-    setPendingData(null);
-    setActionModal(false);
+    setFormError("");
     onOpenChange(false);
   };
 
-  const compartir = async (guardarTambien: boolean) => {
-    if (!pendingData) return;
-    setFormError("");
-    if (
-      (!pendingData.email || pendingData.email.trim() === "") &&
-      (!pendingData.phone || pendingData.phone.trim() === "")
-    ) {
-      setFormError("Para compartir para revisión, por favor indica al menos un correo electrónico o teléfono de contacto.");
-      return;
-    }
-    if (guardarTambien) {
-      guardarBorrador(pendingData);
-    }
-    await enviarPropuesta(pendingData);
-    resetAll();
-  };
-
   return (
-    <Dialog open={open} onOpenChange={resetAll}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Añadir/Proponer Punto de Aterrizaje</DialogTitle>
@@ -189,25 +187,22 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
         </DialogHeader>
         <EvacuationPointForm 
           form={form} 
-          onSubmit={onSubmit}
           photos={photos}
           onPhotoUpload={handlePhotoUpload}
+          formError={formError}
         >
-          <DialogFooter className="pt-4 border-t">
-            <Button variant="outline" type="button" onClick={resetAll}>Cancelar</Button>
-            <Button type="submit">Guardar Punto</Button>
+          <DialogFooter className="pt-4 border-t flex flex-col sm:flex-row sm:justify-end gap-2 sm:space-x-2">
+            <Button variant="outline" type="button" onClick={resetAll} disabled={loading}>
+              Cancelar
+            </Button>
+            <Button type="button" onClick={form.handleSubmit(handleSaveToDevice)} disabled={loading}>
+                Guardar en dispositivo
+            </Button>
+            <Button type="button" onClick={form.handleSubmit(handleShareForReview)} disabled={loading}>
+                Compartir para revisión
+            </Button>
           </DialogFooter>
         </EvacuationPointForm>
-        
-        <ActionChoiceModal
-          open={actionModal}
-          loading={loading}
-          formError={formError}
-          onSaveOnly={() => { if (pendingData) { guardarBorrador(pendingData); resetAll(); } }}
-          onShareOnly={() => compartir(false)}
-          onSaveAndShare={() => compartir(true)}
-          onCancel={resetAll}
-        />
       </DialogContent>
     </Dialog>
   );

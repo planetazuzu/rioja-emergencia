@@ -27,18 +27,18 @@ type FormValues = z.infer<typeof evacuationPointFormSchema>;
 
 interface EvacuationPointFormProps {
   form: UseFormReturn<FormValues>;
-  onSubmit: (values: FormValues) => void;
   photos: string[];
   onPhotoUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   children: React.ReactNode; // For the DialogFooter
+  formError?: string;
 }
 
 export const EvacuationPointForm: React.FC<EvacuationPointFormProps> = ({
   form,
-  onSubmit,
   photos,
   onPhotoUpload,
-  children
+  children,
+  formError,
 }) => {
   const handleLocateMe = () => {
     if (!navigator.geolocation) {
@@ -72,7 +72,7 @@ export const EvacuationPointForm: React.FC<EvacuationPointFormProps> = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
+      <form onSubmit={(e) => e.preventDefault()} className="flex flex-col h-full">
         <ScrollArea className="h-[60vh] pr-6 flex-1">
           <div className="space-y-4 py-4">
             <FormField control={form.control} name="name" render={({ field }) => (
@@ -177,6 +177,9 @@ export const EvacuationPointForm: React.FC<EvacuationPointFormProps> = ({
             )}/>
           </div>
         </ScrollArea>
+        {formError && (
+            <div className="my-2 text-destructive bg-red-100 border border-red-300 rounded-md p-2 text-sm dark:bg-red-900/20 dark:border-red-800">{formError}</div>
+        )}
         {children}
       </form>
     </Form>
