@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
 import { AddEvacuationPointDialog } from './AddEvacuationPointDialog';
@@ -38,13 +39,9 @@ export const EmergencyMapLayout = ({
 }) => {
   return (
     <SidebarProvider>
-      <div className="relative w-full h-screen min-h-screen bg-gray-50 flex flex-row">
-        {/* SidebarTrigger (visible sólo en mobile/tablet) */}
-        <div className="absolute top-2 left-2 z-[1100] lg:hidden">
-          <SidebarTrigger />
-        </div>
-        {/* Sidebar colapsable */}
-        <div className="relative z-[10] h-full">
+      <div className="w-full h-screen flex bg-gray-50 relative">
+        {/* Sidebar para desktop, colapsable */}
+        <div className="z-20 h-full w-80 md:w-96 relative hidden lg:block">
           <MapControls
             currentEmergency={currentEmergency}
             nearestEvacuationPoint={nearestEvacuationPoint}
@@ -63,11 +60,31 @@ export const EmergencyMapLayout = ({
           />
           <SidebarRail />
         </div>
-        {/* Contenedor mapa - DEBE OCUPAR TODO EL ESPACIO DISPONIBLE */}
-        <div
-          className="flex-1 min-w-0 min-h-0 relative h-screen min-h-screen bg-gradient-to-br from-blue-100/10 to-blue-200/20"
-          style={{ boxSizing: 'border-box', border: '2px solid #3b82f6' }} // Borde azul para depuración, puedes quitarlo después
-        >
+        {/* SidebarTrigger para mobile */}
+        <div className="absolute top-2 left-2 z-50 lg:hidden">
+          <SidebarTrigger />
+        </div>
+        {/* Sidebar (offcanvas en mobile) */}
+        <div className="lg:hidden">
+          <MapControls
+            currentEmergency={currentEmergency}
+            nearestEvacuationPoint={nearestEvacuationPoint}
+            etas={etas}
+            ambulances={ambulances}
+            helicopter={helicopter}
+            mapLayers={mapLayers}
+            showFilters={showFilters}
+            ambulanceFilter={ambulanceFilter}
+            onAddPointClick={() => setIsAddPointDialogOpen(true)}
+            onToggleLayer={toggleLayer}
+            onToggleFilters={() => setShowFilters((prev: boolean) => !prev)}
+            onAmbulanceFilterChange={setAmbulanceFilter}
+            onAssignResource={handleAssignResource}
+            collapsible="offcanvas"
+          />
+        </div>
+        {/* Contenedor del mapa */}
+        <div className="flex-1 relative h-full min-h-0 min-w-0">
           <MapContainer
             center={[42.4627, -2.4450]}
             zoom={10}
@@ -77,11 +94,11 @@ export const EmergencyMapLayout = ({
               minHeight: "100%",
               borderRadius: '0.5rem',
               cursor: 'grab',
-              background: "#cffafe", // Fondo azul muy claro para depuración
+              background: "#cffafe",
             }}
             scrollWheelZoom
             zoomControl={false}
-            className="leaflet-container" // Para ayudar en depuración y consistencia
+            className="leaflet-container"
           >
             <TileLayer
               attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -120,7 +137,6 @@ export const EmergencyMapLayout = ({
           </div>
         </div>
       </div>
-      {/* CSS global height fix */}
       <style>
         {`
           html, body, #root {
