@@ -8,6 +8,7 @@ import { MapMarkers } from './MapMarkers';
 import { MapClickHandler } from './MapClickHandler';
 import MapRoutes from './MapRoutes';
 import MapCoverageCircles from './MapCoverageCircles';
+import MapSearchControl from './MapSearchControl';
 import {
   SidebarProvider,
   SidebarInset,
@@ -84,6 +85,8 @@ export const EmergencyMapLayout = ({
               />
               <ZoomControl position="topright" />
               
+              <MapSearchControl />
+
               <MapClickHandler onMapClick={handleEmergencyClick} />
 
               <MapMarkers
