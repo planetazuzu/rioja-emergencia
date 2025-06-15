@@ -96,7 +96,6 @@ export const EmergencyMapLayout = ({
               <MapCoverageCircles
                 ambulances={ambulances}
                 showCoverage={isLayerVisible('coverage_zones')}
-                getFilteredAmbulances={getFilteredAmbulances}
               />
               
               <MapRoutes

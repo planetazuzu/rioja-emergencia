@@ -7,13 +7,11 @@ import { Ambulance } from '../types/emergency';
 interface MapCoverageCirclesProps {
     ambulances: Ambulance[];
     showCoverage: boolean;
-    getFilteredAmbulances: () => Ambulance[];
 }
 
 const MapCoverageCircles: React.FC<MapCoverageCirclesProps> = ({ 
     ambulances, 
-    showCoverage, 
-    getFilteredAmbulances 
+    showCoverage
 }) => {
     const map = useMap();
     const circlesRef = useRef<L.Circle[]>([]);
@@ -29,10 +27,8 @@ const MapCoverageCircles: React.FC<MapCoverageCirclesProps> = ({
             return;
         }
 
-        // Crear círculos de cobertura para ambulancias filtradas
-        const filteredAmbulances = getFilteredAmbulances();
-        
-        filteredAmbulances.forEach(ambulance => {
+        // Crear círculos de cobertura para todas las ambulancias disponibles, ignorando los filtros
+        ambulances.forEach(ambulance => {
             if (!ambulance.available) return; // Solo mostrar cobertura de ambulancias disponibles
             
             const color = ambulance.type === 'SVA' ? '#ef4444' : '#22c55e'; // Rojo para SVA, Verde para SVB
@@ -51,7 +47,7 @@ const MapCoverageCircles: React.FC<MapCoverageCirclesProps> = ({
             circlesRef.current.push(circle);
         });
 
-    }, [map, ambulances, showCoverage, getFilteredAmbulances]);
+    }, [map, ambulances, showCoverage]);
 
     return null;
 };
