@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
 import { AddEvacuationPointDialog } from './AddEvacuationPointDialog';
@@ -35,7 +34,7 @@ export const EmergencyMapLayout = ({
 }) => {
   return (
     <SidebarProvider>
-      <div className="flex flex-col lg:flex-row w-full h-full bg-gray-50"> {/* <--- ¡CAMBIO! h-screen por h-full para que herede del padre */}
+      <div className="flex flex-col lg:flex-row w-full h-full bg-gray-50">
         <MapControls
           currentEmergency={currentEmergency}
           nearestEvacuationPoint={nearestEvacuationPoint}
@@ -51,7 +50,8 @@ export const EmergencyMapLayout = ({
           onAmbulanceFilterChange={setAmbulanceFilter}
           onAssignResource={handleAssignResource}
         />
-        <div className="flex-1 min-w-0 min-h-0 relative h-full">
+        {/* Contenedor con clase extra para forzar el alto en móvil */}
+        <div className="flex-1 min-w-0 min-h-0 relative h-full force-map-fullheight">
           <MapContainer 
             center={[42.4627, -2.4450]} 
             zoom={10}
@@ -96,6 +96,18 @@ export const EmergencyMapLayout = ({
           </div>
         </div>
       </div>
+      {/* Inyectar CSS para asegurar la altura del mapa */}
+      <style>
+        {`
+          .force-map-fullheight {
+            min-height: 100dvh !important;
+            height: 100dvh !important;
+            /* fallback for older devices */
+            min-height: 100vh !important;
+            height: 100vh !important;
+          }
+        `}
+      </style>
     </SidebarProvider>
   );
 };
