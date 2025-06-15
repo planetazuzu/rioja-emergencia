@@ -30,6 +30,11 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
   isLayerVisible,
   getFilteredAmbulances,
 }) => {
+  const getAmbulanceColor = (ambulance: Ambulance) => {
+    if (!ambulance.available) return 'bg-gray-400';
+    return ambulance.type === 'SVA' ? 'bg-red-500' : 'bg-green-500'; // Rojo para SVA, Verde para SVB
+  };
+
   return (
     <>
       {/* Ambulancias */}
@@ -38,7 +43,7 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
           key={ambulance.id}
           position={[ambulance.lat, ambulance.lng]}
           icon={createDivIcon(
-            <div className={`p-2 rounded-full ${ambulance.available ? 'bg-green-500' : 'bg-gray-400'} shadow-lg border-2 border-white`}>
+            <div className={`p-2 rounded-full ${getAmbulanceColor(ambulance)} shadow-lg border-2 border-white`}>
               <AmbulanceIcon className="h-5 w-5 text-white" />
             </div>
           )}
@@ -46,7 +51,9 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
           <Popup>
             <b>{ambulance.name}</b> ({ambulance.type})<br />
             Base: {ambulance.base}<br />
-            Estado: {ambulance.available ? 'Disponible' : 'No disponible'}
+            Estado: {ambulance.available ? 'Disponible' : 'No disponible'}<br />
+            <span className={`inline-block w-3 h-3 rounded-full mr-1 ${ambulance.type === 'SVA' ? 'bg-red-500' : 'bg-green-500'}`}></span>
+            {ambulance.type === 'SVA' ? 'Soporte Vital Avanzado' : 'Soporte Vital Básico'}
           </Popup>
         </Marker>
       ))}

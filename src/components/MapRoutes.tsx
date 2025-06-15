@@ -1,3 +1,4 @@
+
 import { useEffect, useRef } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -58,13 +59,9 @@ const MapRoutes: React.FC<MapRoutesProps> = ({ currentEmergency, ambulances, hel
                         fitSelectedRoutes: false,
                         show: false, // Ocultar panel de itinerario
                         lineOptions: {
-                            styles: [{ color: '#ef4444', opacity: 0.8, weight: 6 }] // Rojo
+                            styles: [{ color: '#ef4444', opacity: 0.8, weight: 6 }]
                         } as any, // HACK: To fix type issue with leaflet-routing-machine
-                        createMarker: () => null, // No crear marcadores adicionales
-                    }).addTo(map);
-
-                    // Deshabilitar que los waypoints se puedan arrastrar después de crear el control
-                    control.getPlan().options.draggableWaypoints = false;
+                    } as any).addTo(map);
 
                     routesRef.current.push(control);
                 }

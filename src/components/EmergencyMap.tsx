@@ -10,6 +10,7 @@ import { MapClickHandler } from './MapClickHandler';
 import { useToast } from "@/hooks/use-toast";
 import { initializeLeafletIcons } from '../utils/mapUtils';
 import MapRoutes from './MapRoutes';
+import MapCoverageCircles from './MapCoverageCircles';
 import { 
   loadAmbulancesFromLocal, 
   loadHelicopterFromLocal, 
@@ -225,6 +226,12 @@ const EmergencyMap: React.FC = () => {
             currentEmergency={currentEmergency}
             nearestEvacuationPoint={nearestEvacuationPoint}
             isLayerVisible={isLayerVisible}
+            getFilteredAmbulances={getFilteredAmbulances}
+          />
+
+          <MapCoverageCircles
+            ambulances={ambulances}
+            showCoverage={isLayerVisible('coverage_zones')}
             getFilteredAmbulances={getFilteredAmbulances}
           />
 
