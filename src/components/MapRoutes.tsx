@@ -55,7 +55,6 @@ const MapRoutes: React.FC<MapRoutesProps> = ({ currentEmergency, ambulances, hel
                         waypoints: [resourceLocation, emergencyLocation],
                         routeWhileDragging: false,
                         addWaypoints: false,
-                        draggableWaypoints: false,
                         fitSelectedRoutes: false,
                         show: false, // Ocultar panel de itinerario
                         lineOptions: {
@@ -63,6 +62,10 @@ const MapRoutes: React.FC<MapRoutesProps> = ({ currentEmergency, ambulances, hel
                         } as any, // HACK: To fix type issue with leaflet-routing-machine
                         createMarker: () => null, // No crear marcadores adicionales
                     }).addTo(map);
+
+                    // Deshabilitar que los waypoints se puedan arrastrar después de crear el control
+                    control.getPlan().options.draggableWaypoints = false;
+
                     routesRef.current.push(control);
                 }
             }
