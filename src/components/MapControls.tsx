@@ -1,8 +1,6 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
--import { AlertTriangle, MapPinPlus, Download } from 'lucide-react';
-+import { AlertTriangle, Ambulance, MapPinPlus, Download } from 'lucide-react';
+import { AlertTriangle, Ambulance, MapPinPlus, Download } from 'lucide-react';
 import { MapLayers } from './MapLayers';
 import { EmergencyInfo } from './EmergencyInfo';
 import { ETAList } from './ETAList';
@@ -57,15 +55,11 @@ export const MapControls: React.FC<MapControlsProps> = ({
   return (
     <Sidebar collapsible={collapsible}>
       <SidebarHeader className="p-4 border-b">
--        <h1 className="text-xl font-bold text-emergency-red flex items-center gap-2">
--          <AlertTriangle className="h-6 w-6" />
--          Emergencias La Rioja
--        </h1>
-+        <h1 className="text-xl font-bold text-emergency-red flex items-center gap-2">
-+          <Ambulance className="h-6 w-6" />
-+          <AlertTriangle className="h-5 w-5 mt-[2px]" />
-+          Emergencias La Rioja
-+        </h1>
+        <h1 className="text-xl font-bold text-emergency-red flex items-center gap-2">
+          <Ambulance className="h-6 w-6" />
+          <AlertTriangle className="h-5 w-5 mt-[2px]" />
+          Emergencias La Rioja
+        </h1>
       </SidebarHeader>
 
       <SidebarContent className="overflow-y-auto">
