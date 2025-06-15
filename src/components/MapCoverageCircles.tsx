@@ -27,10 +27,12 @@ const MapCoverageCircles: React.FC<MapCoverageCirclesProps> = ({
             return;
         }
 
-        // Crear círculos de cobertura para todas las ambulancias disponibles, ignorando los filtros
-        ambulances.forEach(ambulance => {
-            if (!ambulance.available) return; // Solo mostrar cobertura de ambulancias disponibles
-            
+        // Filtrar ambulancias disponibles
+        const availableAmbulances = ambulances.filter(amb => amb.available);
+        console.log("MapCoverageCircles - ambulancias disponibles para círculo:", availableAmbulances);
+
+        // Crear círculos de cobertura para ambulancias disponibles
+        availableAmbulances.forEach(ambulance => {
             const color = ambulance.type === 'SVA' ? '#ef4444' : '#22c55e'; // Rojo para SVA, Verde para SVB
             const radius = ambulance.type === 'SVA' ? 15000 : 10000; // 15km para SVA, 10km para SVB
             
@@ -53,3 +55,4 @@ const MapCoverageCircles: React.FC<MapCoverageCirclesProps> = ({
 };
 
 export default MapCoverageCircles;
+
