@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
 import "leaflet/dist/leaflet.css";
 import { findNearestEvacuationPoint, calculateAllETAs } from '../utils/calculations';
-import { Emergency, ETA, MapLayer } from '../types/emergency';
+import { Emergency, ETA, MapLayer, EvacuationPoint } from '../types/emergency';
 import { AddEvacuationPointDialog } from './AddEvacuationPointDialog';
 import { MapControls } from './MapControls';
 import { MapMarkers } from './MapMarkers';
