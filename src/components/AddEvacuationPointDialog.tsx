@@ -34,6 +34,9 @@ type LocalEvacPoint = Omit<EvacuationPoint, 'id' | 'status' | 'restrictions'> & 
   restrictions?: string;
 };
 
+// --- NUEVO: tipo auxiliar para incluir datos de contacto
+type EvacPointWithContact = Omit<EvacuationPoint, 'id'> & { email?: string; phone?: string };
+
 const LOCAL_STORAGE_KEY = "evacuation-point-borradores-v2";
 
 const formSchema = z.object({
@@ -58,7 +61,7 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
   const [photos, setPhotos] = useState<string[]>([]);
   const [borradores, setBorradores] = useState<LocalEvacPoint[]>([]);
   const [actionModal, setActionModal] = useState(false);
-  const [pendingData, setPendingData] = useState<Omit<EvacuationPoint, 'id'> | null>(null);
+  const [pendingData, setPendingData] = useState<EvacPointWithContact | null>(null);
   const [loading, setLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -90,7 +93,7 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
     setBorradores(newBorradores);
   }
 
-  function guardarBorrador(data: Omit<EvacuationPoint, 'id'>) {
+  function guardarBorrador(data: EvacPointWithContact) {
     const newDraft: LocalEvacPoint = {
       ...data,
       id: crypto.randomUUID(),
@@ -112,7 +115,7 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
 
   // --- Envío remoto
   async function enviarPropuesta(
-    datos: Omit<EvacuationPoint, 'id'> & { email?: string; phone?: string },
+    datos: EvacPointWithContact,
     quitarLocalId?: string
   ) {
     setLoading(true);
@@ -215,7 +218,7 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
   // --- Cuando el usuario pulse "Guardar Punto", mostrar elección modal
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     setFormError(""); // Limpiar error previo
-    const pointData: Omit<EvacuationPoint, 'id'> & { email?: string; phone?: string } = {
+    const pointData: EvacPointWithContact = {
       name: values.name,
       locality: values.locality,
       lat: values.lat,
