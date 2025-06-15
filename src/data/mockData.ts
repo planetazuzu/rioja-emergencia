@@ -1,4 +1,3 @@
-
 import { Ambulance, Helicopter, EvacuationPoint } from '../types/emergency';
 
 export const mockAmbulances: Ambulance[] = [
@@ -85,6 +84,8 @@ export const mockEvacuationPoints: EvacuationPoint[] = [
     status: 'available',
     restrictions: 'Ninguna',
     isDaytimeOnly: false,
+    createdBy: 'System',
+    photos: [],
   },
   {
     id: 'eva-002',
@@ -96,6 +97,8 @@ export const mockEvacuationPoints: EvacuationPoint[] = [
     status: 'available',
     restrictions: 'Uso diurno preferente',
     isDaytimeOnly: true,
+    createdBy: 'System',
+    photos: [],
   },
   {
     id: 'eva-003',
@@ -107,6 +110,8 @@ export const mockEvacuationPoints: EvacuationPoint[] = [
     status: 'available',
     restrictions: 'Coordinar con ayuntamiento',
     isDaytimeOnly: false,
+    createdBy: 'System',
+    photos: [],
   },
   {
     id: 'eva-004',
@@ -118,6 +123,8 @@ export const mockEvacuationPoints: EvacuationPoint[] = [
     status: 'available',
     restrictions: 'Ninguna',
     isDaytimeOnly: false,
+    createdBy: 'System',
+    photos: [],
   },
   {
     id: 'eva-005',
@@ -129,6 +136,8 @@ export const mockEvacuationPoints: EvacuationPoint[] = [
     status: 'available',
     restrictions: 'Evitar fines de semana',
     isDaytimeOnly: true,
+    createdBy: 'System',
+    photos: [],
   },
   {
     id: 'eva-006',
@@ -140,5 +149,7 @@ export const mockEvacuationPoints: EvacuationPoint[] = [
     status: 'available',
     restrictions: 'Temporada deportiva',
     isDaytimeOnly: true,
+    createdBy: 'System',
+    photos: [],
   },
 ];

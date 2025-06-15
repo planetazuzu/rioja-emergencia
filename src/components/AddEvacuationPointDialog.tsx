@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -77,13 +76,19 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
   };
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    onSave({
-      ...values,
+    const pointData: Omit<EvacuationPoint, 'id'> = {
+      name: values.name,
+      locality: values.locality,
+      lat: values.lat,
+      lng: values.lng,
       description: values.description || '',
+      createdBy: values.createdBy,
+      isDaytimeOnly: values.isDaytimeOnly,
       status: 'available',
       restrictions: 'Ninguna',
-      photos,
-    });
+      photos: photos,
+    };
+    onSave(pointData);
     form.reset();
     setPhotos([]);
     onOpenChange(false);

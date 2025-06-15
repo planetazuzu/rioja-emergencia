@@ -43,10 +43,37 @@ const createDivIcon = (iconComponent: React.ReactNode) => {
   });
 };
 
+const STORAGE_KEY = 'emergency-evacuation-points';
+
+const saveCustomPointsToLocal = (points: EvacuationPoint[]): void => {
+  try {
+    const data = JSON.stringify(points);
+    localStorage.setItem(STORAGE_KEY, data);
+  } catch (error) {
+    console.error("Error saving evacuation points to local storage:", error);
+  }
+};
+
+const loadCustomPointsFromLocal = (): EvacuationPoint[] => {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (data) {
+      return JSON.parse(data) as EvacuationPoint[];
+    }
+    return [];
+  } catch (error) {
+    console.error("Error loading evacuation points from local storage:", error);
+    return [];
+  }
+};
+
 const EmergencyMap: React.FC = () => {
   const [ambulances] = useState<Ambulance[]>(mockAmbulances);
   const [helicopter] = useState<Helicopter>(mockHelicopter);
-  const [evacuationPoints, setEvacuationPoints] = useState<EvacuationPoint[]>(mockEvacuationPoints);
+  const [evacuationPoints, setEvacuationPoints] = useState<EvacuationPoint[]>(() => {
+    const customPoints = loadCustomPointsFromLocal();
+    return [...mockEvacuationPoints, ...customPoints];
+  });
   const [currentEmergency, setCurrentEmergency] = useState<Emergency | null>(null);
   const [etas, setEtas] = useState<ETA[]>([]);
   const [nearestEvacuationPoint, setNearestEvacuationPoint] = useState<EvacuationPoint | null>(null);
@@ -96,12 +123,17 @@ const EmergencyMap: React.FC = () => {
       id: `eva-custom-${Date.now()}`,
     };
 
-    setEvacuationPoints(prevPoints => [...prevPoints, newPoint]);
+    setEvacuationPoints(prevPoints => {
+      const updatedPoints = [...prevPoints, newPoint];
+      const customPointsToSave = updatedPoints.filter(p => p.id.startsWith('eva-custom-'));
+      saveCustomPointsToLocal(customPointsToSave);
+      return updatedPoints;
+    });
     setIsAddPointDialogOpen(false);
 
     toast({
-      title: "Punto de aterrizaje añadido",
-      description: `${newPoint.name} ha sido guardado para esta sesión.`,
+      title: "Punto de aterrizaje guardado",
+      description: `${newPoint.name} ha sido guardado y estará disponible en futuras sesiones.`,
     });
   };
 
