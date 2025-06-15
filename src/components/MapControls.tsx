@@ -12,7 +12,7 @@ interface MapControlsProps {
   nearestEvacuationPoint: EvacuationPoint | null;
   etas: ETA[];
   ambulances: Ambulance[];
-  helicopter: Helicopter;
+  helicopter: Helicopter | null;
   mapLayers: MapLayer[];
   showFilters: boolean;
   ambulanceFilter: 'all' | 'SVB' | 'SVA' | 'available';
@@ -20,6 +20,7 @@ interface MapControlsProps {
   onToggleLayer: (layerId: string) => void;
   onToggleFilters: () => void;
   onAmbulanceFilterChange: (filter: 'all' | 'SVB' | 'SVA' | 'available') => void;
+  onAssignResource: (resourceId: string) => void;
 }
 
 export const MapControls: React.FC<MapControlsProps> = ({
@@ -35,6 +36,7 @@ export const MapControls: React.FC<MapControlsProps> = ({
   onToggleLayer,
   onToggleFilters,
   onAmbulanceFilterChange,
+  onAssignResource,
 }) => {
   return (
     <div className="w-full lg:w-96 bg-white border-r border-gray-200 overflow-y-auto">
@@ -79,6 +81,8 @@ export const MapControls: React.FC<MapControlsProps> = ({
         etas={etas}
         ambulances={ambulances}
         helicopter={helicopter}
+        onAssignResource={onAssignResource}
+        assignedResources={currentEmergency?.assignedResources || []}
       />
     </div>
   );

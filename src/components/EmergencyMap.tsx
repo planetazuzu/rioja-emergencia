@@ -9,11 +9,14 @@ import { MapMarkers } from './MapMarkers';
 import { MapClickHandler } from './MapClickHandler';
 import { useToast } from "@/hooks/use-toast";
 import { initializeLeafletIcons } from '../utils/mapUtils';
+import { MapRoutes } from './MapRoutes';
 import { 
   loadAmbulancesFromLocal, 
   loadHelicopterFromLocal, 
   loadEvacuationPointsFromLocal,
   saveEvacuationPointsToLocal,
+  saveAmbulancesToLocal,
+  saveHelicopterToLocal,
   initializeDefaultData 
 } from '../utils/localStorage';
 
@@ -85,6 +88,48 @@ const EmergencyMap: React.FC = () => {
     }
   };
 
+  const handleAssignResource = (resourceId: string) => {
+    const isAmbulance = ambulances.some(a => a.id === resourceId);
+    let resourceName = '';
+    let isAssignedCurrently = false;
+
+    if (currentEmergency) {
+      isAssignedCurrently = currentEmergency.assignedResources.includes(resourceId);
+    }
+    
+    // Cambiar asignación en la emergencia actual
+    setCurrentEmergency(prev => {
+      if (!prev) return null;
+      const newAssigned = isAssignedCurrently
+        ? prev.assignedResources.filter(id => id !== resourceId)
+        : [...prev.assignedResources, resourceId];
+      return { ...prev, assignedResources: newAssigned };
+    });
+
+    // Cambiar disponibilidad en la lista de recursos
+    if (isAmbulance) {
+      const updatedAmbulances = ambulances.map(amb => {
+        if (amb.id === resourceId) {
+          resourceName = amb.name;
+          return { ...amb, available: isAssignedCurrently }; // Si estaba asignado, ahora está disponible
+        }
+        return amb;
+      });
+      setAmbulances(updatedAmbulances);
+      saveAmbulancesToLocal(updatedAmbulances);
+    } else if (helicopter && helicopter.id === resourceId) {
+      resourceName = helicopter.name;
+      const updatedHelicopter = { ...helicopter, available: isAssignedCurrently };
+      setHelicopter(updatedHelicopter);
+      saveHelicopterToLocal(updatedHelicopter);
+    }
+
+    toast({
+      title: "Recurso actualizado",
+      description: `${resourceName} ha sido ${isAssignedCurrently ? 'liberado' : 'asignado'} a la emergencia.`,
+    });
+  };
+
   const handleSaveNewPoint = (pointData: Omit<EvacuationPoint, 'id'>) => {
     const newPoint: EvacuationPoint = {
       ...pointData,
@@ -154,6 +199,7 @@ const EmergencyMap: React.FC = () => {
         onToggleLayer={toggleLayer}
         onToggleFilters={() => setShowFilters(!showFilters)}
         onAmbulanceFilterChange={setAmbulanceFilter}
+        onAssignResource={handleAssignResource}
       />
 
       {/* Mapa principal */}
@@ -180,6 +226,12 @@ const EmergencyMap: React.FC = () => {
             nearestEvacuationPoint={nearestEvacuationPoint}
             isLayerVisible={isLayerVisible}
             getFilteredAmbulances={getFilteredAmbulances}
+          />
+
+          <MapRoutes 
+            currentEmergency={currentEmergency}
+            ambulances={ambulances}
+            helicopter={helicopter}
           />
         </MapContainer>
         
