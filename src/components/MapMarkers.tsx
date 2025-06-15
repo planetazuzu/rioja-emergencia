@@ -21,6 +21,45 @@ interface MapMarkersProps {
   getFilteredAmbulances: () => Ambulance[];
 }
 
+// Helper function to adjust ambulance positions to avoid overlap
+const getAdjustedAmbulances = (ambulancesToAdjust: Ambulance[]) => {
+  const ambulancesByLocation: Map<string, Ambulance[]> = new Map();
+
+  ambulancesToAdjust.forEach(ambulance => {
+    // Group ambulances by location, using toFixed to handle floating point inaccuracies
+    const key = `${ambulance.lat.toFixed(5)},${ambulance.lng.toFixed(5)}`;
+    if (!ambulancesByLocation.has(key)) {
+      ambulancesByLocation.set(key, []);
+    }
+    ambulancesByLocation.get(key)!.push(ambulance);
+  });
+
+  const adjusted: (Ambulance & { renderLat: number; renderLng: number })[] = [];
+
+  ambulancesByLocation.forEach(group => {
+    if (group.length > 1) {
+      // If multiple ambulances are at the same location, spread them in a circle
+      const angleStep = (2 * Math.PI) / group.length;
+      const offsetDistance = 0.00015; // ~16.5 meters offset
+
+      group.forEach((ambulance, index) => {
+        const angle = index * angleStep;
+        const newLat = ambulance.lat + offsetDistance * Math.cos(angle);
+        const newLng = ambulance.lng + offsetDistance * Math.sin(angle);
+        
+        adjusted.push({ ...ambulance, renderLat: newLat, renderLng: newLng });
+      });
+    } else {
+      // If only one ambulance, use its original position
+      const ambulance = group[0];
+      adjusted.push({ ...ambulance, renderLat: ambulance.lat, renderLng: ambulance.lng });
+    }
+  });
+  
+  return adjusted;
+};
+
+
 export const MapMarkers: React.FC<MapMarkersProps> = ({
   ambulances,
   helicopter,
@@ -49,17 +88,16 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
   };
 
   const filteredAmbulances = getFilteredAmbulances();
-  console.log('Filtered ambulances:', filteredAmbulances);
+  const adjustedAmbulances = getAdjustedAmbulances(filteredAmbulances);
 
   return (
     <>
       {/* Ambulancias */}
-      {isLayerVisible('ambulances') && filteredAmbulances.map(ambulance => {
-        console.log('Rendering ambulance:', ambulance.name, ambulance.lat, ambulance.lng);
+      {isLayerVisible('ambulances') && adjustedAmbulances.map(ambulance => {
         return (
           <Marker 
             key={ambulance.id}
-            position={[ambulance.lat, ambulance.lng]}
+            position={[ambulance.renderLat, ambulance.renderLng]}
             icon={createDivIcon(
               <div className={`p-2 rounded-full ${getAmbulanceColor(ambulance)} shadow-lg border-2 border-white`}>
                 <AmbulanceIcon className="h-5 w-5 text-white" />
