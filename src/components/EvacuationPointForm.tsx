@@ -73,7 +73,7 @@ export const EvacuationPointForm: React.FC<EvacuationPointFormProps> = ({
   return (
     <Form {...form}>
       <form onSubmit={(e) => e.preventDefault()} className="flex flex-col h-full">
-        <ScrollArea className="h-[60vh] pr-6 flex-1">
+        <ScrollArea className="flex-1 pr-6">
           <div className="space-y-4 py-4">
             <FormField control={form.control} name="name" render={({ field }) => (
               <FormItem>
