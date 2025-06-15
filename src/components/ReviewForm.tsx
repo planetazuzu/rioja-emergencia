@@ -1,9 +1,9 @@
-
 import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
+import { useLandingPointLocation } from "./LandingPointLocationContext";
 
 // Estructura de los datos del punto de aterrizaje propuesto
 type LocalData = {
@@ -117,6 +117,28 @@ export default function ReviewForm() {
       fotos: prev.fotos.filter((_, i) => i !== idx),
     }));
   };
+
+  // Actualiza los campos lat/lng si el usuario selecciona en el mapa
+  const { lat, lng } = useLandingPointLocation();
+  React.useEffect(() => {
+    // Sólo actualiza si tenemos valores nuevos y distintos a los actuales
+    if (
+      lat &&
+      lng &&
+      (lat !== local.latitud || lng !== local.longitud)
+    ) {
+      setLocal((prev) => ({
+        ...prev,
+        latitud: lat,
+        longitud: lng,
+      }));
+      toast({
+        title: "Ubicación seleccionada en el mapa",
+        description: `Lat: ${lat}, Lng: ${lng}`
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lat, lng]);
 
   // --------- Borradores gestion local ---------
   function guardarBorrador(data: LocalData) {

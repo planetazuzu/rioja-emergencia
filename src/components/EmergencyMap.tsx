@@ -20,6 +20,7 @@ import {
   saveHelicopterToLocal,
   initializeDefaultData 
 } from '../utils/localStorage';
+import { useLandingPointLocation } from "./LandingPointLocationContext";
 
 // Inicializar iconos de Leaflet
 initializeLeafletIcons();
@@ -43,6 +44,7 @@ const EmergencyMap: React.FC = () => {
   const [ambulanceFilter, setAmbulanceFilter] = useState<'all' | 'SVB' | 'SVA' | 'available'>('all');
   const [isAddPointDialogOpen, setIsAddPointDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { setLatLng } = useLandingPointLocation();
 
   // Cargar datos desde localStorage al inicializar
   useEffect(() => {
@@ -64,6 +66,8 @@ const EmergencyMap: React.FC = () => {
   }, []);
 
   const handleEmergencyClick = (lat: number, lng: number) => {
+    setLatLng(lat, lng); // <<< ALTA la localización para ReviewForm
+
     const emergency: Emergency = {
       id: `emergency-${Date.now()}`,
       lat,
