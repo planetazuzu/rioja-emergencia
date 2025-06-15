@@ -17,6 +17,12 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface MapControlsProps {
   currentEmergency: Emergency | null;
@@ -61,52 +67,58 @@ export const MapControls: React.FC<MapControlsProps> = ({
                 <AlertTriangle className="h-6 w-6" />
                 Emergencias La Rioja
               </h1>
-              <SidebarTrigger asChild>
-                <Button variant="ghost" size="sm" className="lg:hidden">
-                  <Menu className="h-4 w-4" />
-                </Button>
+              <SidebarTrigger className="lg:hidden">
+                <Menu className="h-4 w-4" />
               </SidebarTrigger>
             </div>
           </SidebarHeader>
 
           <SidebarContent className="overflow-y-auto">
-            <SidebarGroup>
-              <SidebarGroupLabel>Acciones</SidebarGroupLabel>
-              <SidebarGroupContent className="space-y-2">
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={onAddPointClick}
-                >
-                  <MapPinPlus className="h-4 w-4 mr-2" />
-                  Añadir Punto de Aterrizaje
-                </Button>
-                {isInstallable && (
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={installApp}
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Instalar App
-                  </Button>
-                )}
-              </SidebarGroupContent>
-            </SidebarGroup>
+            <Accordion type="multiple" defaultValue={["acciones", "capas"]} className="w-full">
+              <AccordionItem value="acciones">
+                <AccordionTrigger className="px-4 py-2 text-sm font-medium">
+                  Acciones
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-2">
+                  <div className="space-y-2">
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={onAddPointClick}
+                    >
+                      <MapPinPlus className="h-4 w-4 mr-2" />
+                      Añadir Punto de Aterrizaje
+                    </Button>
+                    {isInstallable && (
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={installApp}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Instalar App
+                      </Button>
+                    )}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
 
-            <SidebarGroup>
-              <SidebarGroupLabel>Capas del Mapa</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <MapLayers
-                  mapLayers={mapLayers}
-                  showFilters={showFilters}
-                  ambulanceFilter={ambulanceFilter}
-                  onToggleLayer={onToggleLayer}
-                  onToggleFilters={onToggleFilters}
-                  onAmbulanceFilterChange={onAmbulanceFilterChange}
-                />
-              </SidebarGroupContent>
-            </SidebarGroup>
+              <AccordionItem value="capas">
+                <AccordionTrigger className="px-4 py-2 text-sm font-medium">
+                  Capas del Mapa
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-2">
+                  <MapLayers
+                    mapLayers={mapLayers}
+                    showFilters={showFilters}
+                    ambulanceFilter={ambulanceFilter}
+                    onToggleLayer={onToggleLayer}
+                    onToggleFilters={onToggleFilters}
+                    onAmbulanceFilterChange={onAmbulanceFilterChange}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
 
             <EmergencyInfo
               currentEmergency={currentEmergency}
