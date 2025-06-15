@@ -104,7 +104,7 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Añadir Nuevo Punto de Aterrizaje</DialogTitle>
+          <DialogTitle>Añadir/Proponer Punto de Aterrizaje</DialogTitle>
           <DialogDescription>
             Introduce los detalles del nuevo punto. Se guardará para la sesión actual.
           </DialogDescription>
