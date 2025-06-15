@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,49 +17,27 @@ import {
 import { mockAmbulances, mockHelicopter, mockEvacuationPoints } from '../data/mockData';
 import { findNearestEvacuationPoint, calculateAllETAs, formatETA } from '../utils/calculations';
 import { Ambulance, Helicopter, EvacuationPoint, Emergency, ETA, MapLayer } from '../types/emergency';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, ZoomControl } from 'react-leaflet';
+import L from 'leaflet';
+import "leaflet/dist/leaflet.css";
+import { renderToString } from 'react-dom/server';
 
-// Simulación de mapa básico (en una implementación real usarías Leaflet o Mapbox)
-const MapContainer: React.FC<{
-  children: React.ReactNode;
-  center: [number, number];
-  zoom: number;
-  className?: string;
-}> = ({ children, center, zoom, className = '' }) => {
-  return (
-    <div className={`bg-slate-100 border-2 border-slate-200 rounded-lg relative overflow-hidden ${className}`}>
-      <div className="absolute top-2 left-2 bg-white px-2 py-1 rounded text-xs text-gray-600">
-        Mapa de La Rioja - Centro: {center[0].toFixed(4)}, {center[1].toFixed(4)} | Zoom: {zoom}
-      </div>
-      <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-blue-50 opacity-60"></div>
-      {children}
-    </div>
-  );
-};
+// Fix para los iconos por defecto de Leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
-const MapMarker: React.FC<{
-  lat: number;
-  lng: number;
-  children: React.ReactNode;
-  className?: string;
-}> = ({ lat, lng, children, className = '' }) => {
-  // Convertir coordenadas a posición en el mapa (simulación)
-  const baseLatRange = [42.0, 42.8]; // Rango aproximado de La Rioja
-  const baseLngRange = [-3.0, -1.5];
-  
-  const x = ((lng - baseLngRange[0]) / (baseLngRange[1] - baseLngRange[0])) * 100;
-  const y = ((baseLatRange[1] - lat) / (baseLatRange[1] - baseLatRange[0])) * 100;
-  
-  return (
-    <div 
-      className={`absolute transform -translate-x-1/2 -translate-y-1/2 ${className}`}
-      style={{ 
-        left: `${Math.max(5, Math.min(95, x))}%`, 
-        top: `${Math.max(5, Math.min(95, y))}%` 
-      }}
-    >
-      {children}
-    </div>
-  );
+// Función para crear iconos personalizados para el mapa
+const createDivIcon = (iconComponent: React.ReactNode) => {
+  return L.divIcon({
+    html: renderToString(iconComponent),
+    className: 'bg-transparent border-0',
+    iconSize: [36, 36],
+    iconAnchor: [18, 36], // La punta del marcador estará en la coordenada
+  });
 };
 
 const EmergencyMap: React.FC = () => {
@@ -142,6 +119,20 @@ const EmergencyMap: React.FC = () => {
     return layer ? layer.visible : true;
   };
 
+  // Componente para manejar los clics en el mapa
+  const MapClickHandler: React.FC<{ onMapClick: (lat: number, lng: number) => void }> = ({ onMapClick }) => {
+    useMapEvents({
+      click(e) {
+        // Evita crear una emergencia si se hace clic en un marcador o popup existente
+        if ((e.originalEvent.target as HTMLElement).closest('.leaflet-marker-icon, .leaflet-popup-content')) {
+          return;
+        }
+        onMapClick(e.latlng.lat, e.latlng.lng);
+      },
+    });
+    return null;
+  };
+
   // Simular un incidente de ejemplo
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -154,7 +145,7 @@ const EmergencyMap: React.FC = () => {
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-gray-50">
       {/* Panel de control lateral */}
-      <div className="w-full lg:w-80 bg-white border-r border-gray-200 overflow-y-auto">
+      <div className="w-full lg:w-96 bg-white border-r border-gray-200 overflow-y-auto">
         <div className="p-4 border-b border-gray-200">
           <h1 className="text-xl font-bold text-emergency-red flex items-center gap-2">
             <AlertTriangle className="h-6 w-6" />
@@ -287,7 +278,7 @@ const EmergencyMap: React.FC = () => {
                               (resource as Ambulance)?.name : 
                               (resource as Helicopter)?.name}
                           </p>
-                          <p className="text-xs text-gray-500">{eta.distance} km</p>
+                          <p className="text-xs text-gray-500">{eta.distance.toFixed(1)} km</p>
                         </div>
                       </div>
                       <Badge variant="outline" className="font-bold">
@@ -303,91 +294,112 @@ const EmergencyMap: React.FC = () => {
       </div>
 
       {/* Mapa principal */}
-      <div className="flex-1 p-4">
+      <div className="flex-1 p-4 relative">
         <MapContainer 
           center={[42.4627, -2.4450]} 
           zoom={10}
-          className="map-container"
+          style={{ height: "100%", width: "100%", borderRadius: '0.5rem' }}
+          scrollWheelZoom
+          zoomControl={false}
         >
+          <TileLayer
+            attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <ZoomControl position="topright" />
+          <MapClickHandler onMapClick={handleEmergencyClick} />
+
           {/* Ambulancias */}
           {isLayerVisible('ambulances') && getFilteredAmbulances().map(ambulance => (
-            <MapMarker 
+            <Marker 
               key={ambulance.id}
-              lat={ambulance.lat} 
-              lng={ambulance.lng}
-              className="cursor-pointer"
-            >
-              <div className="relative">
-                <div className={`p-2 rounded-full ${ambulance.available ? 'bg-green-500' : 'bg-gray-400'} shadow-lg hover:scale-110 transition-transform`}>
+              position={[ambulance.lat, ambulance.lng]}
+              icon={createDivIcon(
+                <div className={`p-2 rounded-full ${ambulance.available ? 'bg-green-500' : 'bg-gray-400'} shadow-lg border-2 border-white`}>
                   <AmbulanceIcon className="h-5 w-5 text-white" />
                 </div>
-                <div className="absolute -bottom-1 -right-1 bg-white text-xs px-1 rounded border">
-                  {ambulance.type}
-                </div>
-                <div className="absolute top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity">
-                  {ambulance.name}
-                </div>
-              </div>
-            </MapMarker>
+              )}
+            >
+              <Popup>
+                <b>{ambulance.name}</b> ({ambulance.type})<br />
+                Base: {ambulance.base}<br />
+                Estado: {ambulance.available ? 'Disponible' : 'No disponible'}
+              </Popup>
+            </Marker>
           ))}
 
           {/* Helicóptero */}
           {isLayerVisible('helicopter') && (
-            <MapMarker lat={helicopter.lat} lng={helicopter.lng}>
-              <div className="relative">
-                <div className={`p-2 rounded-full ${helicopter.available ? 'bg-blue-500' : 'bg-gray-400'} shadow-lg hover:scale-110 transition-transform`}>
+            <Marker 
+              position={[helicopter.lat, helicopter.lng]}
+              icon={createDivIcon(
+                <div className={`p-2 rounded-full ${helicopter.available ? 'bg-blue-500' : 'bg-gray-400'} shadow-lg border-2 border-white`}>
                   <Plane className="h-5 w-5 text-white" />
                 </div>
-                <div className="absolute top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity">
-                  {helicopter.name}
-                </div>
-              </div>
-            </MapMarker>
+              )}
+            >
+              <Popup>
+                <b>{helicopter.name}</b><br />
+                Base: {helicopter.base}<br />
+                Estado: {helicopter.available ? 'Disponible' : 'No disponible'}
+              </Popup>
+            </Marker>
           )}
 
           {/* Puntos de evacuación */}
           {isLayerVisible('evacuation_points') && evacuationPoints.map(point => (
-            <MapMarker 
+            <Marker 
               key={point.id}
-              lat={point.lat} 
-              lng={point.lng}
-            >
-              <div className="relative">
-                <div className={`p-2 rounded-full ${point.status === 'available' ? 'bg-orange-500' : 'bg-red-500'} shadow-lg hover:scale-110 transition-transform`}>
+              position={[point.lat, point.lng]}
+              icon={createDivIcon(
+                <div className={`p-2 rounded-full ${point.status === 'available' ? 'bg-orange-500' : 'bg-red-500'} shadow-lg border-2 border-white`}>
                   <Navigation className="h-4 w-4 text-white" />
                 </div>
-                <div className="absolute top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity z-10">
-                  {point.name}
-                </div>
-              </div>
-            </MapMarker>
+              )}
+            >
+              <Popup>
+                <b>{point.name}</b> ({point.locality})<br />
+                Estado: {point.status === 'available' ? 'Disponible' : 'No disponible'}<br />
+                <i>{point.description}</i>
+              </Popup>
+            </Marker>
           ))}
 
           {/* Emergencia actual */}
           {isLayerVisible('incidents') && currentEmergency && (
-            <MapMarker lat={currentEmergency.lat} lng={currentEmergency.lng}>
-              <div className="relative">
-                <div className="p-3 rounded-full bg-red-600 shadow-lg animate-pulse-emergency">
-                  <AlertTriangle className="h-6 w-6 text-white" />
+            <Marker 
+              position={[currentEmergency.lat, currentEmergency.lng]}
+              icon={createDivIcon(
+                <div className="relative">
+                  <div className="p-3 rounded-full bg-red-600 shadow-lg animate-pulse-emergency border-2 border-white">
+                    <AlertTriangle className="h-6 w-6 text-white" />
+                  </div>
                 </div>
-                <div className="absolute top-12 left-1/2 transform -translate-x-1/2 bg-red-600 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                  EMERGENCIA ACTIVA
-                </div>
-              </div>
-            </MapMarker>
+              )}
+            >
+              <Popup>
+                <b>EMERGENCIA ACTIVA</b><br />
+                {currentEmergency.address}<br />
+                Prioridad: {currentEmergency.priority.toUpperCase()}
+              </Popup>
+            </Marker>
+          )}
+          
+          {/* Resaltado del punto de evacuación */}
+          {nearestEvacuationPoint && (
+             <Marker
+                position={[nearestEvacuationPoint.lat, nearestEvacuationPoint.lng]}
+                icon={L.divIcon({
+                    className: 'bg-transparent border-0',
+                    html: `<div class="rounded-full bg-yellow-400 animate-ping opacity-75" style="width:48px; height:48px; transform: translate(-12px, -24px);"></div>`
+                })}
+            />
           )}
 
-          {/* Punto de evacuación recomendado (resaltado) */}
-          {nearestEvacuationPoint && (
-            <MapMarker lat={nearestEvacuationPoint.lat} lng={nearestEvacuationPoint.lng}>
-              <div className="absolute inset-0 rounded-full bg-yellow-400 animate-ping opacity-75 scale-150"></div>
-            </MapMarker>
-          )}
         </MapContainer>
         
-        {/* Instrucciones */}
-        <div className="mt-4 text-center text-sm text-gray-600">
-          <p>💡 Haz clic en cualquier punto del mapa para simular una emergencia</p>
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] bg-white/80 px-4 py-2 rounded-lg shadow-md text-sm text-gray-700 pointer-events-none">
+          <p>💡 Haz clic en el mapa para simular una emergencia</p>
         </div>
       </div>
     </div>
