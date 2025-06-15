@@ -22,9 +22,9 @@ export const MapLayers: React.FC<MapLayersProps> = ({
   onAmbulanceFilterChange,
 }) => {
   return (
-    <>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-gray-800">Visibilidad de Capas</h3>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium">Visibilidad de Capas</span>
         <Button
           variant="outline"
           size="sm"
@@ -50,7 +50,7 @@ export const MapLayers: React.FC<MapLayersProps> = ({
       </div>
 
       {showFilters && (
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+        <div className="p-3 bg-gray-50 rounded-lg">
           <h3 className="text-sm font-medium mb-2">Filtros Ambulancias</h3>
           <div className="space-y-1">
             {['all', 'SVB', 'SVA', 'available'].map(filter => (
@@ -68,6 +68,6 @@ export const MapLayers: React.FC<MapLayersProps> = ({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
