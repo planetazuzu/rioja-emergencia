@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 import { AddEvacuationPointDialog } from './AddEvacuationPointDialog';
 import { MapControls } from './MapControls';
 import { MapMarkers } from './MapMarkers';
@@ -63,16 +63,13 @@ export const EmergencyMapLayout = ({
             <div className="text-lg font-semibold">Mapa de Emergencias</div>
           </header>
           
-          <div className="flex-1 relative" style={{ height: 'calc(100vh - 3rem)' }}>
+          <div className="flex-1 relative">
             <MapContainer
               center={[42.4627, -2.4450]}
               zoom={10}
               style={{
                 height: "100%",
                 width: "100%",
-                position: "absolute",
-                top: 0,
-                left: 0,
                 zIndex: 1
               }}
               scrollWheelZoom={true}

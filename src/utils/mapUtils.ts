@@ -9,7 +9,7 @@ export const createDivIcon = (iconComponent: React.ReactNode) => {
   
   return L.divIcon({
     html: iconHTML,
-    className: 'bg-transparent border-0',
+    className: '', // Usar la clase por defecto de Leaflet para mayor compatibilidad
     iconSize: [36, 36],
     iconAnchor: [18, 36], // La punta del marcador estará en la coordenada
   });
