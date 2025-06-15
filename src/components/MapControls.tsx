@@ -1,12 +1,13 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, MapPinPlus } from 'lucide-react';
+import { AlertTriangle, MapPinPlus, Download } from 'lucide-react';
 import { MapLayers } from './MapLayers';
 import { EmergencyInfo } from './EmergencyInfo';
 import { ETAList } from './ETAList';
 import { Emergency, EvacuationPoint, ETA, Ambulance, Helicopter, MapLayer } from '../types/emergency';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { usePWAInstall } from '../hooks/usePWAInstall';
 
 interface MapControlsProps {
   currentEmergency: Emergency | null;
@@ -39,6 +40,8 @@ export const MapControls: React.FC<MapControlsProps> = ({
   onAmbulanceFilterChange,
   onAssignResource,
 }) => {
+  const { isInstallable, installApp } = usePWAInstall();
+
   return (
     <div className="w-full lg:w-96 bg-white border-r border-gray-200 overflow-y-auto">
       <div className="p-4 border-b border-gray-200">
@@ -54,14 +57,26 @@ export const MapControls: React.FC<MapControlsProps> = ({
             Acciones
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={onAddPointClick}
-            >
-              <MapPinPlus className="h-4 w-4 mr-2" />
-              Añadir Punto de Aterrizaje
-            </Button>
+            <div className="space-y-2">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={onAddPointClick}
+              >
+                <MapPinPlus className="h-4 w-4 mr-2" />
+                Añadir Punto de Aterrizaje
+              </Button>
+              {isInstallable && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={installApp}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Instalar App
+                </Button>
+              )}
+            </div>
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="capas" className="border-b">
@@ -87,7 +102,6 @@ export const MapControls: React.FC<MapControlsProps> = ({
         nearestEvacuationPoint={nearestEvacuationPoint}
       />
 
-      {/* ETAs */}
       <ETAList
         etas={etas}
         ambulances={ambulances}
