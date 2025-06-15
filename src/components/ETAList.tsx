@@ -13,7 +13,7 @@ import { formatETA } from '../utils/calculations';
 interface ETAListProps {
   etas: ETA[];
   ambulances: Ambulance[];
-  helicopter: Helicopter;
+  helicopter: Helicopter | null;
 }
 
 export const ETAList: React.FC<ETAListProps> = ({ etas, ambulances, helicopter }) => {

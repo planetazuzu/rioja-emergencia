@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
 import "leaflet/dist/leaflet.css";
-import { mockAmbulances, mockHelicopter, mockEvacuationPoints } from '../data/mockData';
 import { findNearestEvacuationPoint, calculateAllETAs } from '../utils/calculations';
 import { Ambulance, Helicopter, EvacuationPoint, Emergency, ETA, MapLayer } from '../types/emergency';
 import { AddEvacuationPointDialog } from './AddEvacuationPointDialog';
@@ -11,18 +10,21 @@ import { MapMarkers } from './MapMarkers';
 import { MapClickHandler } from './MapClickHandler';
 import { useToast } from "@/hooks/use-toast";
 import { initializeLeafletIcons } from '../utils/mapUtils';
-import { saveCustomPointsToLocal, loadCustomPointsFromLocal } from '../utils/localStorage';
+import { 
+  loadAmbulancesFromLocal, 
+  loadHelicopterFromLocal, 
+  loadEvacuationPointsFromLocal,
+  saveEvacuationPointsToLocal,
+  initializeDefaultData 
+} from '../utils/localStorage';
 
 // Inicializar iconos de Leaflet
 initializeLeafletIcons();
 
 const EmergencyMap: React.FC = () => {
-  const [ambulances] = useState<Ambulance[]>(mockAmbulances);
-  const [helicopter] = useState<Helicopter>(mockHelicopter);
-  const [evacuationPoints, setEvacuationPoints] = useState<EvacuationPoint[]>(() => {
-    const customPoints = loadCustomPointsFromLocal();
-    return [...mockEvacuationPoints, ...customPoints];
-  });
+  const [ambulances, setAmbulances] = useState<Ambulance[]>([]);
+  const [helicopter, setHelicopter] = useState<Helicopter | null>(null);
+  const [evacuationPoints, setEvacuationPoints] = useState<EvacuationPoint[]>([]);
   const [currentEmergency, setCurrentEmergency] = useState<Emergency | null>(null);
   const [etas, setEtas] = useState<ETA[]>([]);
   const [nearestEvacuationPoint, setNearestEvacuationPoint] = useState<EvacuationPoint | null>(null);
@@ -38,6 +40,25 @@ const EmergencyMap: React.FC = () => {
   const [ambulanceFilter, setAmbulanceFilter] = useState<'all' | 'SVB' | 'SVA' | 'available'>('all');
   const [isAddPointDialogOpen, setIsAddPointDialogOpen] = useState(false);
   const { toast } = useToast();
+
+  // Cargar datos desde localStorage al inicializar
+  useEffect(() => {
+    initializeDefaultData();
+    
+    const loadedAmbulances = loadAmbulancesFromLocal();
+    const loadedHelicopter = loadHelicopterFromLocal();
+    const loadedPoints = loadEvacuationPointsFromLocal();
+
+    setAmbulances(loadedAmbulances);
+    setHelicopter(loadedHelicopter);
+    setEvacuationPoints(loadedPoints);
+
+    console.log('Datos cargados desde localStorage:', {
+      ambulances: loadedAmbulances.length,
+      helicopter: loadedHelicopter ? 1 : 0,
+      evacuationPoints: loadedPoints.length
+    });
+  }, []);
 
   const handleEmergencyClick = (lat: number, lng: number) => {
     const emergency: Emergency = {
@@ -58,8 +79,8 @@ const EmergencyMap: React.FC = () => {
     const nearest = findNearestEvacuationPoint(lat, lng, evacuationPoints);
     setNearestEvacuationPoint(nearest);
 
-    // Calcular ETAs si hay punto de evacuación
-    if (nearest) {
+    // Calcular ETAs si hay punto de evacuación y helicóptero
+    if (nearest && helicopter) {
       const calculatedETAs = calculateAllETAs(ambulances, helicopter, nearest.lat, nearest.lng);
       setEtas(calculatedETAs);
     }
@@ -71,16 +92,13 @@ const EmergencyMap: React.FC = () => {
       id: `eva-custom-${Date.now()}`,
     };
 
-    setEvacuationPoints(prevPoints => {
-      const updatedPoints = [...prevPoints, newPoint];
-      const customPointsToSave = updatedPoints.filter(p => p.id.startsWith('eva-custom-'));
-      saveCustomPointsToLocal(customPointsToSave);
-      return updatedPoints;
-    });
+    const updatedPoints = [...evacuationPoints, newPoint];
+    setEvacuationPoints(updatedPoints);
+    saveEvacuationPointsToLocal(updatedPoints);
 
     toast({
       title: "Punto de aterrizaje guardado",
-      description: `${newPoint.name} ha sido guardado y estará disponible en futuras sesiones.`,
+      description: `${newPoint.name} ha sido guardado en la memoria del dispositivo.`,
     });
   };
 
@@ -119,15 +137,8 @@ const EmergencyMap: React.FC = () => {
     return layer ? layer.visible : true;
   };
 
-  // Simular un incidente de ejemplo
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      handleEmergencyClick(42.3500, -2.1000); // Coordenadas entre Calahorra y Arnedo
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
+  // No simular incidente automático, esperar interacción del usuario
+  
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-gray-50">
       {/* Panel de control lateral */}

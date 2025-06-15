@@ -13,7 +13,7 @@ import { createDivIcon } from '../utils/mapUtils';
 
 interface MapMarkersProps {
   ambulances: Ambulance[];
-  helicopter: Helicopter;
+  helicopter: Helicopter | null;
   evacuationPoints: EvacuationPoint[];
   currentEmergency: Emergency | null;
   nearestEvacuationPoint: EvacuationPoint | null;
@@ -52,7 +52,7 @@ export const MapMarkers: React.FC<MapMarkersProps> = ({
       ))}
 
       {/* Helicóptero */}
-      {isLayerVisible('helicopter') && (
+      {isLayerVisible('helicopter') && helicopter && (
         <Marker 
           position={[helicopter.lat, helicopter.lng]}
           icon={createDivIcon(
