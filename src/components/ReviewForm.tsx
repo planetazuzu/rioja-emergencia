@@ -4,19 +4,22 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
-import { EvacuationPoint } from "../types/emergency";
 
-// LocalStorage keys
-const LOCAL_STORAGE_KEY = "review-form-data";
-const EVA_POINTS_KEY = "emergency-evacuation-points";
-
-// Tipos para los datos locales
+// Estructura de los datos del punto de aterrizaje propuesto
 type LocalData = {
   nombre: string;
   telefono: string;
+  nombrePunto: string;
+  localidad: string;
+  latitud: string;
+  longitud: string;
+  descripcion: string;
+  restricciones: string;
+  soloDiurno: boolean;
   observaciones: string;
-  evacuationPointId: string;
 };
+
+const LOCAL_STORAGE_KEY = "review-form-data-propuesta-punto";
 
 function saveLocalData(data: LocalData) {
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
@@ -24,58 +27,68 @@ function saveLocalData(data: LocalData) {
 
 function loadLocalData(): LocalData {
   const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-  if (!raw) return { nombre: "", telefono: "", observaciones: "", evacuationPointId: "" };
-  try {
-    const parsed = JSON.parse(raw);
-    // fallback para antiguos usuarios que no tenían el campo
-    return { evacuationPointId: "", ...parsed, evacuationPointId: parsed.evacuationPointId || "" };
-  } catch {
-    return { nombre: "", telefono: "", observaciones: "", evacuationPointId: "" };
+  if (!raw) {
+    return {
+      nombre: "",
+      telefono: "",
+      nombrePunto: "",
+      localidad: "",
+      latitud: "",
+      longitud: "",
+      descripcion: "",
+      restricciones: "",
+      soloDiurno: false,
+      observaciones: "",
+    };
   }
-}
-
-function loadEvacuationPoints(): EvacuationPoint[] {
   try {
-    const raw = localStorage.getItem(EVA_POINTS_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as EvacuationPoint[];
+    return JSON.parse(raw);
   } catch {
-    return [];
+    return {
+      nombre: "",
+      telefono: "",
+      nombrePunto: "",
+      localidad: "",
+      latitud: "",
+      longitud: "",
+      descripcion: "",
+      restricciones: "",
+      soloDiurno: false,
+      observaciones: "",
+    };
   }
 }
 
 export default function ReviewForm() {
   const [local, setLocal] = useState<LocalData>(loadLocalData());
   const [loading, setLoading] = useState(false);
-  const [evacuationPoints, setEvacuationPoints] = useState<EvacuationPoint[]>([]);
 
   useEffect(() => {
     saveLocalData(local);
   }, [local]);
 
-  useEffect(() => {
-    setEvacuationPoints(loadEvacuationPoints());
-  }, []);
-
-  // Simulación de usuario actual, reemplaza con hook de autenticación real si existe.
+  // Simulación de usuario actual
   const currentUser = { email: "usuario@ejemplo.com" };
 
   const handleChange =
     (field: keyof LocalData) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-      setLocal({ ...local, [field]: e.target.value });
+      const value = e.target.type === "checkbox" ? (e.target as HTMLInputElement).checked : e.target.value;
+      setLocal({ ...local, [field]: value });
     };
 
-  const selectedEvacuationPoint = evacuationPoints.find(
-    (p) => p.id === local.evacuationPointId
-  );
-
   const handleSubmit = async () => {
-    if (!local.evacuationPointId) {
+    // Validaciones simples para campos requeridos
+    if (
+      !local.nombrePunto ||
+      !local.localidad ||
+      !local.latitud ||
+      !local.longitud
+    ) {
       toast({
         variant: "destructive",
-        title: "Selecciona un punto de aterrizaje",
-        description: "Debes seleccionar un punto de aterrizaje para continuar.",
+        title: "Faltan datos",
+        description: "Por favor, completa los campos obligatorios del punto de aterrizaje.",
       });
       return;
     }
@@ -92,8 +105,16 @@ export default function ReviewForm() {
             datos: {
               nombre: local.nombre,
               telefono: local.telefono,
-              observaciones: local.observaciones,
-              puntoDeAterrizaje: selectedEvacuationPoint, // toda la info
+              puntoDeAterrizaje: {
+                nombre: local.nombrePunto,
+                localidad: local.localidad,
+                latitud: local.latitud,
+                longitud: local.longitud,
+                descripcion: local.descripcion,
+                restricciones: local.restricciones,
+                soloDiurno: local.soloDiurno,
+                observaciones: local.observaciones,
+              },
             },
           }),
         }
@@ -121,8 +142,9 @@ export default function ReviewForm() {
         handleSubmit();
       }}
     >
+      <h2 className="text-lg font-bold text-center mb-3">Proponer nuevo punto de aterrizaje</h2>
       <div>
-        <label className="block mb-1 font-bold">Nombre</label>
+        <label className="block mb-1 font-bold">Tu nombre</label>
         <Input
           type="text"
           value={local.nombre}
@@ -131,35 +153,90 @@ export default function ReviewForm() {
         />
       </div>
       <div>
-        <label className="block mb-1 font-bold">Teléfono</label>
+        <label className="block mb-1 font-bold">Tu teléfono</label>
         <Input
           type="tel"
           value={local.telefono}
           onChange={handleChange("telefono")}
         />
       </div>
+      <hr />
       <div>
-        <label className="block mb-1 font-bold">Punto de aterrizaje</label>
-        <select
-          value={local.evacuationPointId}
-          onChange={handleChange("evacuationPointId")}
-          className="block w-full border border-input rounded px-3 py-2 bg-white text-sm"
+        <label className="block mb-1 font-bold">Nombre del punto de aterrizaje</label>
+        <Input
+          type="text"
+          value={local.nombrePunto}
+          onChange={handleChange("nombrePunto")}
           required
-        >
-          <option value="">Selecciona uno...</option>
-          {evacuationPoints.map(point => (
-            <option key={point.id} value={point.id}>
-              {point.name} ({point.locality})
-            </option>
-          ))}
-        </select>
+        />
+      </div>
+      <div>
+        <label className="block mb-1 font-bold">Localidad</label>
+        <Input
+          type="text"
+          value={local.localidad}
+          onChange={handleChange("localidad")}
+          required
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label className="block mb-1 font-bold">Latitud</label>
+          <Input
+            type="number"
+            step="any"
+            value={local.latitud}
+            onChange={handleChange("latitud")}
+            required
+          />
+        </div>
+        <div>
+          <label className="block mb-1 font-bold">Longitud</label>
+          <Input
+            type="number"
+            step="any"
+            value={local.longitud}
+            onChange={handleChange("longitud")}
+            required
+          />
+        </div>
+      </div>
+      <div>
+        <label className="block mb-1 font-bold">Descripción</label>
+        <Textarea
+          value={local.descripcion}
+          onChange={handleChange("descripcion")}
+          rows={2}
+          placeholder="Ej: Terreno llano, acceso sencillo, cerca del centro de salud..."
+        />
+      </div>
+      <div>
+        <label className="block mb-1 font-bold">Restricciones</label>
+        <Input
+          type="text"
+          value={local.restricciones}
+          onChange={handleChange("restricciones")}
+          placeholder="Ej: Uso diurno, pendiente leve..."
+        />
+      </div>
+      <div className="flex items-center gap-2">
+        <input
+          className="form-checkbox"
+          type="checkbox"
+          checked={local.soloDiurno}
+          onChange={handleChange("soloDiurno")}
+          id="soloDiurno"
+        />
+        <label htmlFor="soloDiurno" className="font-semibold select-none cursor-pointer">
+          Solo para uso diurno
+        </label>
       </div>
       <div>
         <label className="block mb-1 font-bold">Observaciones</label>
         <Textarea
           value={local.observaciones}
           onChange={handleChange("observaciones")}
-          rows={3}
+          rows={2}
         />
       </div>
       <Button type="submit" disabled={loading} className="w-full">
