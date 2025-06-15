@@ -9,7 +9,7 @@ import { MapMarkers } from './MapMarkers';
 import { MapClickHandler } from './MapClickHandler';
 import { useToast } from "@/hooks/use-toast";
 import { initializeLeafletIcons } from '../utils/mapUtils';
-import { MapRoutes } from './MapRoutes';
+import MapRoutes from './MapRoutes';
 import { 
   loadAmbulancesFromLocal, 
   loadHelicopterFromLocal, 

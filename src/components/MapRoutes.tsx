@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -61,7 +60,7 @@ const MapRoutes: React.FC<MapRoutesProps> = ({ currentEmergency, ambulances, hel
                         show: false, // Ocultar panel de itinerario
                         lineOptions: {
                             styles: [{ color: '#ef4444', opacity: 0.8, weight: 6 }] // Rojo
-                        },
+                        } as any, // HACK: To fix type issue with leaflet-routing-machine
                         createMarker: () => null, // No crear marcadores adicionales
                     }).addTo(map);
                     routesRef.current.push(control);
