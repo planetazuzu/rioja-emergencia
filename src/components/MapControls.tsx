@@ -38,6 +38,7 @@ interface MapControlsProps {
   onToggleFilters: () => void;
   onAmbulanceFilterChange: (filter: 'all' | 'SVB' | 'SVA' | 'available') => void;
   onAssignResource: (resourceId: string) => void;
+  collapsible?: "icon" | "button";
 }
 
 export const MapControls: React.FC<MapControlsProps> = ({
@@ -54,13 +55,14 @@ export const MapControls: React.FC<MapControlsProps> = ({
   onToggleFilters,
   onAmbulanceFilterChange,
   onAssignResource,
+  collapsible,
 }) => {
   const { isInstallable, installApp } = usePWAInstall();
 
   return (
     <SidebarProvider>
       <div className="flex w-full">
-        <Sidebar className="w-full lg:w-96">
+        <Sidebar className="w-full lg:w-96" collapsible={collapsible}>
           <SidebarHeader className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h1 className="text-xl font-bold text-emergency-red flex items-center gap-2">
