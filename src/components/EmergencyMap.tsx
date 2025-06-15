@@ -12,7 +12,8 @@ import {
   Eye,
   EyeOff,
   AlertTriangle,
-  Navigation
+  Navigation,
+  MapPinPlus,
 } from 'lucide-react';
 import { mockAmbulances, mockHelicopter, mockEvacuationPoints } from '../data/mockData';
 import { findNearestEvacuationPoint, calculateAllETAs, formatETA } from '../utils/calculations';
@@ -21,6 +22,8 @@ import { MapContainer, TileLayer, Marker, Popup, useMapEvents, ZoomControl } fro
 import L from 'leaflet';
 import "leaflet/dist/leaflet.css";
 import { renderToString } from 'react-dom/server';
+import { AddEvacuationPointDialog } from './AddEvacuationPointDialog';
+import { useToast } from "@/hooks/use-toast";
 
 // Fix para los iconos por defecto de Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -43,7 +46,7 @@ const createDivIcon = (iconComponent: React.ReactNode) => {
 const EmergencyMap: React.FC = () => {
   const [ambulances] = useState<Ambulance[]>(mockAmbulances);
   const [helicopter] = useState<Helicopter>(mockHelicopter);
-  const [evacuationPoints] = useState<EvacuationPoint[]>(mockEvacuationPoints);
+  const [evacuationPoints, setEvacuationPoints] = useState<EvacuationPoint[]>(mockEvacuationPoints);
   const [currentEmergency, setCurrentEmergency] = useState<Emergency | null>(null);
   const [etas, setEtas] = useState<ETA[]>([]);
   const [nearestEvacuationPoint, setNearestEvacuationPoint] = useState<EvacuationPoint | null>(null);
@@ -57,6 +60,10 @@ const EmergencyMap: React.FC = () => {
 
   const [showFilters, setShowFilters] = useState(false);
   const [ambulanceFilter, setAmbulanceFilter] = useState<'all' | 'SVB' | 'SVA' | 'available'>('all');
+  
+  const [isAddingPoint, setIsAddingPoint] = useState(false);
+  const [newPointCoords, setNewPointCoords] = useState<{ lat: number, lng: number } | null>(null);
+  const { toast } = useToast();
 
   const handleEmergencyClick = (lat: number, lng: number) => {
     const emergency: Emergency = {
@@ -82,6 +89,42 @@ const EmergencyMap: React.FC = () => {
       const calculatedETAs = calculateAllETAs(ambulances, helicopter, nearest.lat, nearest.lng);
       setEtas(calculatedETAs);
     }
+  };
+
+  const handleStartAddPoint = () => {
+    setIsAddingPoint(true);
+    toast({
+      title: "Modo de adición activado",
+      description: "Haz clic en el mapa para ubicar el nuevo punto de aterrizaje.",
+    });
+  };
+
+  const handleMapClickForNewPoint = (latlng: L.LatLng) => {
+    setNewPointCoords({ lat: latlng.lat, lng: latlng.lng });
+    setIsAddingPoint(false);
+  };
+
+  const handleCloseDialog = () => {
+    setNewPointCoords(null);
+  };
+
+  const handleSaveNewPoint = (pointData: Omit<EvacuationPoint, 'id' | 'lat' | 'lng'>) => {
+    if (!newPointCoords) return;
+
+    const newPoint: EvacuationPoint = {
+      ...pointData,
+      id: `eva-custom-${Date.now()}`,
+      lat: newPointCoords.lat,
+      lng: newPointCoords.lng,
+    };
+
+    setEvacuationPoints(prevPoints => [...prevPoints, newPoint]);
+    setNewPointCoords(null);
+
+    toast({
+      title: "Punto de aterrizaje añadido",
+      description: `${newPoint.name} ha sido guardado para esta sesión.`,
+    });
   };
 
   const toggleLayer = (layerId: string) => {
@@ -127,7 +170,11 @@ const EmergencyMap: React.FC = () => {
         if ((e.originalEvent.target as HTMLElement).closest('.leaflet-marker-icon, .leaflet-popup-content')) {
           return;
         }
-        onMapClick(e.latlng.lat, e.latlng.lng);
+        if (isAddingPoint) {
+          handleMapClickForNewPoint(e.latlng);
+        } else {
+          onMapClick(e.latlng.lat, e.latlng.lng);
+        }
       },
     });
     return null;
@@ -151,6 +198,20 @@ const EmergencyMap: React.FC = () => {
             <AlertTriangle className="h-6 w-6" />
             Emergencias La Rioja
           </h1>
+        </div>
+
+        {/* Acciones */}
+        <div className="p-4 border-b border-gray-200">
+          <h2 className="font-semibold text-gray-800 mb-3">Acciones</h2>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleStartAddPoint}
+            disabled={isAddingPoint}
+          >
+            <MapPinPlus className="h-4 w-4 mr-2" />
+            {isAddingPoint ? 'Selecciona una ubicación...' : 'Añadir Punto de Aterrizaje'}
+          </Button>
         </div>
 
         {/* Controles de capas */}
@@ -298,7 +359,7 @@ const EmergencyMap: React.FC = () => {
         <MapContainer 
           center={[42.4627, -2.4450]} 
           zoom={10}
-          style={{ height: "100%", width: "100%", borderRadius: '0.5rem' }}
+          style={{ height: "100%", width: "100%", borderRadius: '0.5rem', cursor: isAddingPoint ? 'crosshair' : 'grab' }}
           scrollWheelZoom
           zoomControl={false}
         >
@@ -398,6 +459,12 @@ const EmergencyMap: React.FC = () => {
 
         </MapContainer>
         
+        <AddEvacuationPointDialog
+          coords={newPointCoords}
+          onClose={handleCloseDialog}
+          onSave={handleSaveNewPoint}
+        />
+
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] bg-white/80 px-4 py-2 rounded-lg shadow-md text-sm text-gray-700 pointer-events-none">
           <p>💡 Haz clic en el mapa para simular una emergencia</p>
         </div>
