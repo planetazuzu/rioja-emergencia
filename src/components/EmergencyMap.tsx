@@ -154,56 +154,58 @@ const EmergencyMap: React.FC = () => {
         onAssignResource={handleAssignResource}
       />
 
-      <div className="flex-1 p-4 relative min-h-0">
-        <MapContainer 
-          center={[42.4627, -2.4450]} 
-          zoom={10}
-          style={{ height: "100%", width: "100%", borderRadius: '0.5rem', cursor: 'grab' }}
-          scrollWheelZoom
-          zoomControl={false}
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <ZoomControl position="topright" />
-          <MapClickHandler onMapClick={handleEmergencyClick} />
+-      <div className="flex-1 p-4 relative min-h-0">
++      <div className="flex-1 p-4 relative min-h-0 h-full min-h-[400px]">
+         <MapContainer 
+           center={[42.4627, -2.4450]} 
+           zoom={10}
+           style={{ height: "100%", width: "100%", borderRadius: '0.5rem', cursor: 'grab' }}
+           scrollWheelZoom
+           zoomControl={false}
+         >
+           <TileLayer
+             attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+           />
+           <ZoomControl position="topright" />
+           <MapClickHandler onMapClick={handleEmergencyClick} />
 
-          <MapMarkers
-            ambulances={ambulances}
-            helicopter={helicopter}
-            evacuationPoints={evacuationPoints}
-            currentEmergency={currentEmergency}
-            nearestEvacuationPoint={nearestEvacuationPoint}
-            isLayerVisible={isLayerVisible}
-            getFilteredAmbulances={getFilteredAmbulances}
-          />
+           <MapMarkers
+             ambulances={ambulances}
+             helicopter={helicopter}
+             evacuationPoints={evacuationPoints}
+             currentEmergency={currentEmergency}
+             nearestEvacuationPoint={nearestEvacuationPoint}
+             isLayerVisible={isLayerVisible}
+             getFilteredAmbulances={getFilteredAmbulances}
+           />
 
-          <MapCoverageCircles
-            ambulances={ambulances}
-            showCoverage={isLayerVisible('coverage_zones')}
-            getFilteredAmbulances={getFilteredAmbulances}
-          />
+           <MapCoverageCircles
+             ambulances={ambulances}
+             showCoverage={isLayerVisible('coverage_zones')}
+             getFilteredAmbulances={getFilteredAmbulances}
+           />
 
-          <MapRoutes 
-            currentEmergency={currentEmergency}
-            ambulances={ambulances}
-            helicopter={helicopter}
-          />
-        </MapContainer>
-        
-        <AddEvacuationPointDialog
-          open={isAddPointDialogOpen}
-          onOpenChange={setIsAddPointDialogOpen}
-          onSave={addEvacuationPoint}
-        />
+           <MapRoutes 
+             currentEmergency={currentEmergency}
+             ambulances={ambulances}
+             helicopter={helicopter}
+           />
+         </MapContainer>
+         
+         <AddEvacuationPointDialog
+           open={isAddPointDialogOpen}
+           onOpenChange={setIsAddPointDialogOpen}
+           onSave={addEvacuationPoint}
+         />
 
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] bg-background/80 backdrop-blur-sm px-4 py-2 rounded-lg shadow-md text-sm text-foreground pointer-events-none">
-          <p>💡 Haz clic en el mapa para simular una emergencia</p>
-        </div>
-      </div>
-    </div>
+         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] bg-background/80 backdrop-blur-sm px-4 py-2 rounded-lg shadow-md text-sm text-foreground pointer-events-none">
+           <p>💡 Haz clic en el mapa para simular una emergencia</p>
+         </div>
+       </div>
+     </div>
   );
 };
 
 export default EmergencyMap;
+
