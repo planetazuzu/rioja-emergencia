@@ -35,7 +35,7 @@ export const EmergencyMapLayout = ({
 }) => {
   return (
     <SidebarProvider>
-      <div className="flex flex-col lg:flex-row w-full h-screen bg-gray-50">
+      <div className="flex flex-col lg:flex-row w-full h-full bg-gray-50"> {/* <--- ¡CAMBIO! h-screen por h-full para que herede del padre */}
         <MapControls
           currentEmergency={currentEmergency}
           nearestEvacuationPoint={nearestEvacuationPoint}
