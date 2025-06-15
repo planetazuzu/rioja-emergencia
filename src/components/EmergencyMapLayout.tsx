@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
 import { AddEvacuationPointDialog } from './AddEvacuationPointDialog';
@@ -8,7 +9,8 @@ import MapRoutes from './MapRoutes';
 import MapCoverageCircles from './MapCoverageCircles';
 import {
   SidebarProvider,
-  SidebarRail
+  SidebarRail,
+  SidebarTrigger
 } from "@/components/ui/sidebar";
 import { initializeLeafletIcons } from '../utils/mapUtils';
 
@@ -37,9 +39,13 @@ export const EmergencyMapLayout = ({
 }) => {
   return (
     <SidebarProvider>
-      <div className="flex flex-col lg:flex-row w-full h-full bg-gray-50 map-full-height-fix">
+      <div className="flex flex-col lg:flex-row w-full h-screen min-h-screen bg-gray-50 map-full-height-fix">
+        {/* SidebarTrigger para hacer colapsable el menú en mobile/tablet */}
+        <div className="absolute top-2 left-2 z-[1100] lg:hidden">
+          <SidebarTrigger />
+        </div>
         {/* Sidebar colapsable con rail */}
-        <div className="relative z-[10]">
+        <div className="relative z-[10] h-full">
           <MapControls
             currentEmergency={currentEmergency}
             nearestEvacuationPoint={nearestEvacuationPoint}
@@ -56,11 +62,10 @@ export const EmergencyMapLayout = ({
             onAssignResource={handleAssignResource}
             collapsible="icon"
           />
-          {/* La pestañita para colapsar/expandir sidebar */}
           <SidebarRail />
         </div>
         {/* Mapa con altura forzada */}
-        <div className="flex-1 min-w-0 min-h-0 relative h-full">
+        <div className="flex-1 min-w-0 min-h-0 relative h-screen min-h-screen">
           <MapContainer 
             center={[42.4627, -2.4450]} 
             zoom={10}
@@ -105,11 +110,12 @@ export const EmergencyMapLayout = ({
           </div>
         </div>
       </div>
-      {/* Inyectar CSS global para altura 100% en toda la jerarquía (Vite/some templates lo requieren) */}
+      {/* Inyectar CSS global para altura 100% en toda la jerarquía */}
       <style>
         {`
           html, body, #root {
             height: 100%;
+            min-height: 100vh;
           }
           .map-full-height-fix {
             min-height: 100dvh !important;
@@ -122,3 +128,4 @@ export const EmergencyMapLayout = ({
     </SidebarProvider>
   );
 };
+
