@@ -44,6 +44,8 @@ const formSchema = z.object({
   lng: z.coerce.number().min(-180, "Longitud inválida").max(180, "Longitud inválida"),
   createdBy: z.string().min(1, "El autor es obligatorio."),
   isDaytimeOnly: z.boolean().default(false),
+  email: z.string().email("Email inválido").or(z.literal("")).optional(),
+  phone: z.string().min(7, "Teléfono inválido").or(z.literal("")).optional(),
 });
 
 interface AddEvacuationPointDialogProps {
@@ -109,11 +111,13 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
   }
 
   // --- Envío remoto
-  async function enviarPropuesta(datos: Omit<EvacuationPoint, 'id'>, quitarLocalId?: string) {
+  async function enviarPropuesta(
+    datos: Omit<EvacuationPoint, 'id'> & { email?: string; phone?: string },
+    quitarLocalId?: string
+  ) {
     setLoading(true);
     try {
-      // Simula usuario
-      const currentUser = { email: "usuario@ejemplo.com" };
+      const currentUser = { email: datos.email || "usuario@ejemplo.com" };
       await fetch(
         "https://script.google.com/macros/s/AKfycbx1gOPeFd59uKv6FQSG5hFYxzKNcHFs-Xxoiwvmd4ZdQBXogmpkxox3nq4zIVjSnoCBpA/exec",
         {
@@ -121,9 +125,10 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             usuario: currentUser.email,
+            telefono: datos.phone || "",
             datos: {
               nombre: datos.createdBy,
-              telefono: "",
+              telefono: datos.phone || "",
               puntoDeAterrizaje: {
                 nombre: datos.name,
                 localidad: datos.locality,
@@ -209,7 +214,8 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
 
   // --- Cuando el usuario pulse "Guardar Punto", mostrar elección modal
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    const pointData: Omit<EvacuationPoint, 'id'> = {
+    setFormError(""); // Limpiar error previo
+    const pointData: Omit<EvacuationPoint, 'id'> & { email?: string; phone?: string } = {
       name: values.name,
       locality: values.locality,
       lat: values.lat,
@@ -220,10 +226,13 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
       status: 'available',
       restrictions: 'Ninguna',
       photos: photos,
+      email: values.email,
+      phone: values.phone,
     };
-    setPendingData(pointData); // Almacena los datos para la siguiente acción
-    setActionModal(true); // Muestra el modal de elección
+    setPendingData(pointData); // Almacena datos para la siguiente acción
+    setActionModal(true); // Abre modal de elección
   };
+  const [formError, setFormError] = useState("");
 
   // --- Después de completar acción, limpiar todo
   const resetAll = () => {
@@ -237,11 +246,35 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
   // --- Modal de elección de acción: guardar, enviar, ambas
   function ActionChoiceModal() {
     if (!actionModal || !pendingData) return null;
+    // Lógica para controlar error al compartir
+    const compartir = async (guardarTambien: boolean) => {
+      setFormError("");
+      if (
+        (!pendingData.email || pendingData.email.trim() === "") &&
+        (!pendingData.phone || pendingData.phone.trim() === "")
+      ) {
+        setFormError("Para compartir para revisión, por favor indica al menos un correo electrónico o teléfono de contacto.");
+        return;
+      }
+      if (guardarTambien) {
+        guardarBorrador(pendingData);
+      }
+      await enviarPropuesta(pendingData);
+      resetAll();
+    };
     return (
       <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-30">
         <div className="bg-white p-4 rounded-xl shadow-lg max-w-xs w-full text-center">
           <h3 className="font-bold mb-2">¿Qué deseas hacer?</h3>
-          <p className="text-sm mb-4">Puedes guardar el formulario en tu dispositivo, compartirlo para revisión o ambas cosas.</p>
+          <p className="text-sm mb-3">
+            Puedes guardar el formulario en tu dispositivo, compartirlo para revisión o ambas cosas.<br />
+            <span className="text-xs text-muted-foreground block mt-2">
+              <strong>Aviso de privacidad:</strong> Tu email o teléfono solo se usarán para verificar y contactar en caso necesario sobre la propuesta, nunca para uso comercial.
+            </span>
+          </p>
+          {formError && (
+            <div className="mb-2 text-destructive text-sm">{formError}</div>
+          )}
           <div className="flex flex-col gap-2">
             <Button
               variant="default"
@@ -252,20 +285,13 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
             </Button>
             <Button
               disabled={loading}
-              onClick={async () => {
-                await enviarPropuesta(pendingData);
-                resetAll();
-              }}
+              onClick={() => compartir(false)}
             >
               Compartir sólo para revisión
             </Button>
             <Button
               disabled={loading}
-              onClick={async () => {
-                guardarBorrador(pendingData);
-                await enviarPropuesta(pendingData);
-                resetAll();
-              }}
+              onClick={() => compartir(true)}
             >
               Guardar y compartir ambas cosas
             </Button>
@@ -359,6 +385,27 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
                     <FormMessage />
                   </FormItem>
                 )}/>
+                {/* CONTACTO */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField control={form.control} name="email" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email de contacto</FormLabel>
+                      <FormControl><Input type="email" placeholder="correo@ejemplo.com" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}/>
+                  <FormField control={form.control} name="phone" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Teléfono de contacto</FormLabel>
+                      <FormControl><Input type="tel" placeholder="Ej: 612345678" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}/>
+                </div>
+                <span className="block text-xs text-muted-foreground mt-[-10px] mb-2">
+                  {/* Aclaración sobre protección de datos */}
+                  El email o teléfono solo se usarán para comprobar la veracidad de la propuesta.
+                </span>
                 <FormItem>
                   <FormLabel>Fotos de referencia</FormLabel>
                   <FormControl>
