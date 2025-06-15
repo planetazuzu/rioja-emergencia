@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,6 +25,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { EvacuationPoint } from '../types/emergency';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/components/ui/use-toast';
+import { Locate } from "lucide-react";
 
 // ---- Tipado para el borrador local (id, creadoPor extendido, etc)
 type LocalEvacPoint = Omit<EvacuationPoint, 'id' | 'status' | 'restrictions'> & {
@@ -176,6 +176,37 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
     }
   };
 
+  // --- NUEVA función para ubicar al usuario
+  const handleLocateMe = () => {
+    if (!navigator.geolocation) {
+      toast({
+        variant: "destructive",
+        title: "Geolocalización no soportada",
+        description: "Tu navegador no admite la geolocalización."
+      });
+      return;
+    }
+    toast({ title: "Buscando tu ubicación..." });
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        form.setValue("lat", latitude);
+        form.setValue("lng", longitude);
+        toast({
+          title: "Ubicación detectada",
+          description: `Latitud: ${latitude.toFixed(5)}, Longitud: ${longitude.toFixed(5)}`
+        });
+      },
+      (err) => {
+        toast({
+          variant: "destructive",
+          title: "No se pudo obtener la ubicación",
+          description: err.message || "Verifica permisos y conexión."
+        });
+      }
+    );
+  };
+
   // --- Cuando el usuario pulse "Guardar Punto", mostrar elección modal
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const pointData: Omit<EvacuationPoint, 'id'> = {
@@ -282,21 +313,37 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
                     <FormMessage />
                   </FormItem>
                 )}/>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4 items-end">
                   <FormField control={form.control} name="lat" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Latitud</FormLabel>
-                      <FormControl><Input type="number" placeholder="42.2245" {...field} /></FormControl>
+                      <FormControl>
+                        <Input type="number" placeholder="42.2245" {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}/>
-                  <FormField control={form.control} name="lng" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Longitud</FormLabel>
-                      <FormControl><Input type="number" placeholder="-2.1018" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}/>
+                  <div className="flex flex-row gap-2 items-end">
+                    <FormField control={form.control} name="lng" render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>Longitud</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="-2.1018" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}/>
+                    {/* Botón para obtener ubicación */}
+                    <button
+                      type="button"
+                      aria-label="Obtener mi ubicación"
+                      className="h-10 w-10 bg-secondary flex items-center justify-center rounded-md border ml-1 hover:bg-accent transition-colors"
+                      onClick={handleLocateMe}
+                      title="Ubicarme automáticamente"
+                    >
+                      <Locate className="text-primary" />
+                    </button>
+                  </div>
                 </div>
                 <FormField control={form.control} name="description" render={({ field }) => (
                   <FormItem>
@@ -347,4 +394,3 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
     </Dialog>
   );
 };
-
