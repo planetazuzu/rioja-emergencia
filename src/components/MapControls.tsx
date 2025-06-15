@@ -38,7 +38,7 @@ interface MapControlsProps {
   onToggleFilters: () => void;
   onAmbulanceFilterChange: (filter: 'all' | 'SVB' | 'SVA' | 'available') => void;
   onAssignResource: (resourceId: string) => void;
-  collapsible?: "icon" | "button";
+  collapsible?: "icon" | "offcanvas" | "none";
 }
 
 export const MapControls: React.FC<MapControlsProps> = ({

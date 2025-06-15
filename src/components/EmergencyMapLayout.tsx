@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
 import { AddEvacuationPointDialog } from './AddEvacuationPointDialog';
@@ -61,7 +60,7 @@ export const EmergencyMapLayout = ({
           <SidebarRail />
         </div>
         {/* Mapa con altura forzada */}
-        <div className="flex-1 min-w-0 min-h-0 relative h-full force-map-fullheight">
+        <div className="flex-1 min-w-0 min-h-0 relative h-full">
           <MapContainer 
             center={[42.4627, -2.4450]} 
             zoom={10}
@@ -113,12 +112,6 @@ export const EmergencyMapLayout = ({
             height: 100%;
           }
           .map-full-height-fix {
-            min-height: 100dvh !important;
-            height: 100dvh !important;
-            min-height: 100vh !important;
-            height: 100vh !important;
-          }
-          .force-map-fullheight {
             min-height: 100dvh !important;
             height: 100dvh !important;
             min-height: 100vh !important;
