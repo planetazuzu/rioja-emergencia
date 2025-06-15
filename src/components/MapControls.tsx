@@ -6,15 +6,7 @@ import { EmergencyInfo } from './EmergencyInfo';
 import { ETAList } from './ETAList';
 import { Emergency, EvacuationPoint, ETA, Ambulance as AmbulanceType, Helicopter, MapLayer } from '../types/emergency';
 import { usePWAInstall } from '../hooks/usePWAInstall';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-} from "@/components/ui/sidebar";
-
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader } from "@/components/ui/sidebar";
 interface MapControlsProps {
   currentEmergency: Emergency | null;
   nearestEvacuationPoint: EvacuationPoint | null;
@@ -32,7 +24,6 @@ interface MapControlsProps {
   onClearEmergency: () => void;
   collapsible?: "icon" | "offcanvas" | "none";
 }
-
 export const MapControls: React.FC<MapControlsProps> = ({
   currentEmergency,
   nearestEvacuationPoint,
@@ -48,16 +39,17 @@ export const MapControls: React.FC<MapControlsProps> = ({
   onAmbulanceFilterChange,
   onAssignResource,
   onClearEmergency,
-  collapsible = "offcanvas",
+  collapsible = "offcanvas"
 }) => {
-  const { isInstallable, installApp } = usePWAInstall();
-
-  return (
-    <Sidebar collapsible={collapsible}>
+  const {
+    isInstallable,
+    installApp
+  } = usePWAInstall();
+  return <Sidebar collapsible={collapsible}>
       <SidebarHeader className="p-4 border-b">
         <h1 className="text-xl font-bold text-emergency-red flex items-center gap-2">
           <Ambulance className="h-6 w-6" />
-          <AlertTriangle className="h-5 w-5 mt-[2px]" />
+          
           Emergencias La Rioja
         </h1>
       </SidebarHeader>
@@ -67,24 +59,14 @@ export const MapControls: React.FC<MapControlsProps> = ({
           <SidebarGroupLabel>Acciones</SidebarGroupLabel>
           <SidebarGroupContent>
             <div className="space-y-2 px-2">
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={onAddPointClick}
-              >
+              <Button variant="outline" className="w-full" onClick={onAddPointClick}>
                 <MapPinPlus className="h-4 w-4 mr-2" />
                 Añadir Punto de Aterrizaje
               </Button>
-              {isInstallable && (
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={installApp}
-                >
+              {isInstallable && <Button variant="outline" className="w-full" onClick={installApp}>
                   <Download className="h-4 w-4 mr-2" />
                   Instalar App
-                </Button>
-              )}
+                </Button>}
             </div>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -93,34 +75,16 @@ export const MapControls: React.FC<MapControlsProps> = ({
           <SidebarGroupLabel>Capas del Mapa</SidebarGroupLabel>
           <SidebarGroupContent>
             <div className="px-2">
-              <MapLayers
-                mapLayers={mapLayers}
-                showFilters={showFilters}
-                ambulanceFilter={ambulanceFilter}
-                onToggleLayer={onToggleLayer}
-                onToggleFilters={onToggleFilters}
-                onAmbulanceFilterChange={onAmbulanceFilterChange}
-              />
+              <MapLayers mapLayers={mapLayers} showFilters={showFilters} ambulanceFilter={ambulanceFilter} onToggleLayer={onToggleLayer} onToggleFilters={onToggleFilters} onAmbulanceFilterChange={onAmbulanceFilterChange} />
             </div>
           </SidebarGroupContent>
         </SidebarGroup>
 
         <div className="px-2 space-y-4">
-          <EmergencyInfo
-            currentEmergency={currentEmergency}
-            nearestEvacuationPoint={nearestEvacuationPoint}
-            onClearEmergency={onClearEmergency}
-          />
+          <EmergencyInfo currentEmergency={currentEmergency} nearestEvacuationPoint={nearestEvacuationPoint} onClearEmergency={onClearEmergency} />
 
-          <ETAList
-            etas={etas}
-            ambulances={ambulances}
-            helicopter={helicopter}
-            onAssignResource={onAssignResource}
-            assignedResources={currentEmergency?.assignedResources || []}
-          />
+          <ETAList etas={etas} ambulances={ambulances} helicopter={helicopter} onAssignResource={onAssignResource} assignedResources={currentEmergency?.assignedResources || []} />
         </div>
       </SidebarContent>
-    </Sidebar>
-  );
+    </Sidebar>;
 };
