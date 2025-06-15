@@ -1,34 +1,32 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
 import "leaflet/dist/leaflet.css";
 import { findNearestEvacuationPoint, calculateAllETAs } from '../utils/calculations';
-import { Ambulance, Helicopter, EvacuationPoint, Emergency, ETA, MapLayer } from '../types/emergency';
+import { Emergency, ETA, MapLayer } from '../types/emergency';
 import { AddEvacuationPointDialog } from './AddEvacuationPointDialog';
 import { MapControls } from './MapControls';
 import { MapMarkers } from './MapMarkers';
 import { MapClickHandler } from './MapClickHandler';
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { initializeLeafletIcons } from '../utils/mapUtils';
 import MapRoutes from './MapRoutes';
 import MapCoverageCircles from './MapCoverageCircles';
-import { 
-  loadAmbulancesFromLocal, 
-  loadHelicopterFromLocal, 
-  loadEvacuationPointsFromLocal,
-  saveEvacuationPointsToLocal,
-  saveAmbulancesToLocal,
-  saveHelicopterToLocal,
-  initializeDefaultData 
-} from '../utils/localStorage';
 import { useLandingPointLocation } from "./LandingPointLocationContext";
+import { useEmergencyData } from '../hooks/useEmergencyData';
 
-// Inicializar iconos de Leaflet
 initializeLeafletIcons();
 
 const EmergencyMap: React.FC = () => {
-  const [ambulances, setAmbulances] = useState<Ambulance[]>([]);
-  const [helicopter, setHelicopter] = useState<Helicopter | null>(null);
-  const [evacuationPoints, setEvacuationPoints] = useState<EvacuationPoint[]>([]);
+  const { 
+    ambulances, 
+    helicopter, 
+    evacuationPoints,
+    updateAmbulances,
+    updateHelicopter,
+    addEvacuationPoint 
+  } = useEmergencyData();
+  
   const [currentEmergency, setCurrentEmergency] = useState<Emergency | null>(null);
   const [etas, setEtas] = useState<ETA[]>([]);
   const [nearestEvacuationPoint, setNearestEvacuationPoint] = useState<EvacuationPoint | null>(null);
@@ -46,27 +44,8 @@ const EmergencyMap: React.FC = () => {
   const { toast } = useToast();
   const { setLatLng } = useLandingPointLocation();
 
-  // Cargar datos desde localStorage al inicializar
-  useEffect(() => {
-    initializeDefaultData();
-    
-    const loadedAmbulances = loadAmbulancesFromLocal();
-    const loadedHelicopter = loadHelicopterFromLocal();
-    const loadedPoints = loadEvacuationPointsFromLocal();
-
-    setAmbulances(loadedAmbulances);
-    setHelicopter(loadedHelicopter);
-    setEvacuationPoints(loadedPoints);
-
-    console.log('Datos cargados desde localStorage:', {
-      ambulances: loadedAmbulances.length,
-      helicopter: loadedHelicopter ? 1 : 0,
-      evacuationPoints: loadedPoints.length
-    });
-  }, []);
-
   const handleEmergencyClick = (lat: number, lng: number) => {
-    setLatLng(lat, lng); // <<< ALTA la localización para ReviewForm
+    setLatLng(lat, lng);
 
     const emergency: Emergency = {
       id: `emergency-${Date.now()}`,
@@ -82,11 +61,9 @@ const EmergencyMap: React.FC = () => {
 
     setCurrentEmergency(emergency);
 
-    // Encontrar punto de evacuación más cercano
     const nearest = findNearestEvacuationPoint(lat, lng, evacuationPoints);
     setNearestEvacuationPoint(nearest);
 
-    // Calcular ETAs si hay punto de evacuación y helicóptero
     if (nearest && helicopter) {
       const calculatedETAs = calculateAllETAs(ambulances, helicopter, nearest.lat, nearest.lng);
       setEtas(calculatedETAs);
@@ -102,7 +79,6 @@ const EmergencyMap: React.FC = () => {
       isAssignedCurrently = currentEmergency.assignedResources.includes(resourceId);
     }
     
-    // Cambiar asignación en la emergencia actual
     setCurrentEmergency(prev => {
       if (!prev) return null;
       const newAssigned = isAssignedCurrently
@@ -111,43 +87,24 @@ const EmergencyMap: React.FC = () => {
       return { ...prev, assignedResources: newAssigned };
     });
 
-    // Cambiar disponibilidad en la lista de recursos
     if (isAmbulance) {
       const updatedAmbulances = ambulances.map(amb => {
         if (amb.id === resourceId) {
           resourceName = amb.name;
-          return { ...amb, available: isAssignedCurrently }; // Si estaba asignado, ahora está disponible
+          return { ...amb, available: isAssignedCurrently };
         }
         return amb;
       });
-      setAmbulances(updatedAmbulances);
-      saveAmbulancesToLocal(updatedAmbulances);
+      updateAmbulances(updatedAmbulances);
     } else if (helicopter && helicopter.id === resourceId) {
       resourceName = helicopter.name;
       const updatedHelicopter = { ...helicopter, available: isAssignedCurrently };
-      setHelicopter(updatedHelicopter);
-      saveHelicopterToLocal(updatedHelicopter);
+      updateHelicopter(updatedHelicopter);
     }
 
     toast({
       title: "Recurso actualizado",
       description: `${resourceName} ha sido ${isAssignedCurrently ? 'liberado' : 'asignado'} a la emergencia.`,
-    });
-  };
-
-  const handleSaveNewPoint = (pointData: Omit<EvacuationPoint, 'id'>) => {
-    const newPoint: EvacuationPoint = {
-      ...pointData,
-      id: `eva-custom-${Date.now()}`,
-    };
-
-    const updatedPoints = [...evacuationPoints, newPoint];
-    setEvacuationPoints(updatedPoints);
-    saveEvacuationPointsToLocal(updatedPoints);
-
-    toast({
-      title: "Punto de aterrizaje guardado",
-      description: `${newPoint.name} ha sido guardado en la memoria del dispositivo.`,
     });
   };
 
@@ -162,23 +119,16 @@ const EmergencyMap: React.FC = () => {
   };
 
   const getFilteredAmbulances = () => {
-    let filtered = ambulances;
-    
     switch (ambulanceFilter) {
       case 'SVB':
-        filtered = ambulances.filter(amb => amb.type === 'SVB');
-        break;
+        return ambulances.filter(amb => amb.type === 'SVB');
       case 'SVA':
-        filtered = ambulances.filter(amb => amb.type === 'SVA');
-        break;
+        return ambulances.filter(amb => amb.type === 'SVA');
       case 'available':
-        filtered = ambulances.filter(amb => amb.available);
-        break;
+        return ambulances.filter(amb => amb.available);
       default:
-        filtered = ambulances;
+        return ambulances;
     }
-    
-    return filtered;
   };
 
   const isLayerVisible = (layerType: string) => {
@@ -186,11 +136,8 @@ const EmergencyMap: React.FC = () => {
     return layer ? layer.visible : true;
   };
 
-  // No simular incidente automático, esperar interacción del usuario
-  
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-gray-50">
-      {/* Panel de control lateral */}
       <MapControls
         currentEmergency={currentEmergency}
         nearestEvacuationPoint={nearestEvacuationPoint}
@@ -207,7 +154,6 @@ const EmergencyMap: React.FC = () => {
         onAssignResource={handleAssignResource}
       />
 
-      {/* Mapa principal */}
       <div className="flex-1 p-4 relative min-h-0">
         <MapContainer 
           center={[42.4627, -2.4450]} 
@@ -249,10 +195,10 @@ const EmergencyMap: React.FC = () => {
         <AddEvacuationPointDialog
           open={isAddPointDialogOpen}
           onOpenChange={setIsAddPointDialogOpen}
-          onSave={handleSaveNewPoint}
+          onSave={addEvacuationPoint}
         />
 
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] bg-white/80 px-4 py-2 rounded-lg shadow-md text-sm text-gray-700 pointer-events-none">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] bg-background/80 backdrop-blur-sm px-4 py-2 rounded-lg shadow-md text-sm text-foreground pointer-events-none">
           <p>💡 Haz clic en el mapa para simular una emergencia</p>
         </div>
       </div>
