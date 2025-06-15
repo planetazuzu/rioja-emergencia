@@ -1,4 +1,3 @@
-
 export interface Ambulance {
   id: string;
   name: string;
@@ -34,6 +33,8 @@ export interface EvacuationPoint {
   status: 'available' | 'unavailable';
   restrictions: string;
   isDaytimeOnly: boolean;
+  createdBy: string;
+  photos: string[]; // Array of base64 data URLs
 }
 
 export interface Emergency {

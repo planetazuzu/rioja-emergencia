@@ -61,8 +61,7 @@ const EmergencyMap: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [ambulanceFilter, setAmbulanceFilter] = useState<'all' | 'SVB' | 'SVA' | 'available'>('all');
   
-  const [isAddingPoint, setIsAddingPoint] = useState(false);
-  const [newPointCoords, setNewPointCoords] = useState<{ lat: number, lng: number } | null>(null);
+  const [isAddPointDialogOpen, setIsAddPointDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const handleEmergencyClick = (lat: number, lng: number) => {
@@ -91,35 +90,14 @@ const EmergencyMap: React.FC = () => {
     }
   };
 
-  const handleStartAddPoint = () => {
-    setIsAddingPoint(true);
-    toast({
-      title: "Modo de adición activado",
-      description: "Haz clic en el mapa para ubicar el nuevo punto de aterrizaje.",
-    });
-  };
-
-  const handleMapClickForNewPoint = (latlng: L.LatLng) => {
-    setNewPointCoords({ lat: latlng.lat, lng: latlng.lng });
-    setIsAddingPoint(false);
-  };
-
-  const handleCloseDialog = () => {
-    setNewPointCoords(null);
-  };
-
-  const handleSaveNewPoint = (pointData: Omit<EvacuationPoint, 'id' | 'lat' | 'lng'>) => {
-    if (!newPointCoords) return;
-
+  const handleSaveNewPoint = (pointData: Omit<EvacuationPoint, 'id'>) => {
     const newPoint: EvacuationPoint = {
       ...pointData,
       id: `eva-custom-${Date.now()}`,
-      lat: newPointCoords.lat,
-      lng: newPointCoords.lng,
     };
 
     setEvacuationPoints(prevPoints => [...prevPoints, newPoint]);
-    setNewPointCoords(null);
+    setIsAddPointDialogOpen(false);
 
     toast({
       title: "Punto de aterrizaje añadido",
@@ -170,11 +148,7 @@ const EmergencyMap: React.FC = () => {
         if ((e.originalEvent.target as HTMLElement).closest('.leaflet-marker-icon, .leaflet-popup-content')) {
           return;
         }
-        if (isAddingPoint) {
-          handleMapClickForNewPoint(e.latlng);
-        } else {
-          onMapClick(e.latlng.lat, e.latlng.lng);
-        }
+        onMapClick(e.latlng.lat, e.latlng.lng);
       },
     });
     return null;
@@ -206,11 +180,10 @@ const EmergencyMap: React.FC = () => {
           <Button
             variant="outline"
             className="w-full"
-            onClick={handleStartAddPoint}
-            disabled={isAddingPoint}
+            onClick={() => setIsAddPointDialogOpen(true)}
           >
             <MapPinPlus className="h-4 w-4 mr-2" />
-            {isAddingPoint ? 'Selecciona una ubicación...' : 'Añadir Punto de Aterrizaje'}
+            Añadir Punto de Aterrizaje
           </Button>
         </div>
 
@@ -359,7 +332,7 @@ const EmergencyMap: React.FC = () => {
         <MapContainer 
           center={[42.4627, -2.4450]} 
           zoom={10}
-          style={{ height: "100%", width: "100%", borderRadius: '0.5rem', cursor: isAddingPoint ? 'crosshair' : 'grab' }}
+          style={{ height: "100%", width: "100%", borderRadius: '0.5rem', cursor: 'grab' }}
           scrollWheelZoom
           zoomControl={false}
         >
@@ -460,8 +433,8 @@ const EmergencyMap: React.FC = () => {
         </MapContainer>
         
         <AddEvacuationPointDialog
-          coords={newPointCoords}
-          onClose={handleCloseDialog}
+          open={isAddPointDialogOpen}
+          onOpenChange={setIsAddPointDialogOpen}
           onSave={handleSaveNewPoint}
         />
 
