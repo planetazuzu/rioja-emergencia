@@ -4,14 +4,19 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
+import { EvacuationPoint } from "../types/emergency";
 
+// LocalStorage keys
+const LOCAL_STORAGE_KEY = "review-form-data";
+const EVA_POINTS_KEY = "emergency-evacuation-points";
+
+// Tipos para los datos locales
 type LocalData = {
   nombre: string;
   telefono: string;
   observaciones: string;
+  evacuationPointId: string;
 };
-
-const LOCAL_STORAGE_KEY = "review-form-data";
 
 function saveLocalData(data: LocalData) {
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
@@ -19,32 +24,62 @@ function saveLocalData(data: LocalData) {
 
 function loadLocalData(): LocalData {
   const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-  if (!raw) return { nombre: "", telefono: "", observaciones: "" };
+  if (!raw) return { nombre: "", telefono: "", observaciones: "", evacuationPointId: "" };
   try {
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    // fallback para antiguos usuarios que no tenían el campo
+    return { evacuationPointId: "", ...parsed, evacuationPointId: parsed.evacuationPointId || "" };
   } catch {
-    return { nombre: "", telefono: "", observaciones: "" };
+    return { nombre: "", telefono: "", observaciones: "", evacuationPointId: "" };
+  }
+}
+
+function loadEvacuationPoints(): EvacuationPoint[] {
+  try {
+    const raw = localStorage.getItem(EVA_POINTS_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as EvacuationPoint[];
+  } catch {
+    return [];
   }
 }
 
 export default function ReviewForm() {
   const [local, setLocal] = useState<LocalData>(loadLocalData());
   const [loading, setLoading] = useState(false);
+  const [evacuationPoints, setEvacuationPoints] = useState<EvacuationPoint[]>([]);
 
   useEffect(() => {
     saveLocalData(local);
   }, [local]);
+
+  useEffect(() => {
+    setEvacuationPoints(loadEvacuationPoints());
+  }, []);
 
   // Simulación de usuario actual, reemplaza con hook de autenticación real si existe.
   const currentUser = { email: "usuario@ejemplo.com" };
 
   const handleChange =
     (field: keyof LocalData) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
       setLocal({ ...local, [field]: e.target.value });
     };
 
+  const selectedEvacuationPoint = evacuationPoints.find(
+    (p) => p.id === local.evacuationPointId
+  );
+
   const handleSubmit = async () => {
+    if (!local.evacuationPointId) {
+      toast({
+        variant: "destructive",
+        title: "Selecciona un punto de aterrizaje",
+        description: "Debes seleccionar un punto de aterrizaje para continuar.",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       await fetch(
@@ -58,6 +93,7 @@ export default function ReviewForm() {
               nombre: local.nombre,
               telefono: local.telefono,
               observaciones: local.observaciones,
+              puntoDeAterrizaje: selectedEvacuationPoint, // toda la info
             },
           }),
         }
@@ -101,6 +137,22 @@ export default function ReviewForm() {
           value={local.telefono}
           onChange={handleChange("telefono")}
         />
+      </div>
+      <div>
+        <label className="block mb-1 font-bold">Punto de aterrizaje</label>
+        <select
+          value={local.evacuationPointId}
+          onChange={handleChange("evacuationPointId")}
+          className="block w-full border border-input rounded px-3 py-2 bg-white text-sm"
+          required
+        >
+          <option value="">Selecciona uno...</option>
+          {evacuationPoints.map(point => (
+            <option key={point.id} value={point.id}>
+              {point.name} ({point.locality})
+            </option>
+          ))}
+        </select>
       </div>
       <div>
         <label className="block mb-1 font-bold">Observaciones</label>
