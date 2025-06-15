@@ -6,6 +6,7 @@ import { MapLayers } from './MapLayers';
 import { EmergencyInfo } from './EmergencyInfo';
 import { ETAList } from './ETAList';
 import { Emergency, EvacuationPoint, ETA, Ambulance, Helicopter, MapLayer } from '../types/emergency';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface MapControlsProps {
   currentEmergency: Emergency | null;
@@ -47,28 +48,38 @@ export const MapControls: React.FC<MapControlsProps> = ({
         </h1>
       </div>
 
-      {/* Acciones */}
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="font-semibold text-gray-800 mb-3">Acciones</h2>
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={onAddPointClick}
-        >
-          <MapPinPlus className="h-4 w-4 mr-2" />
-          Añadir Punto de Aterrizaje
-        </Button>
-      </div>
-
-      {/* Controles de capas */}
-      <MapLayers
-        mapLayers={mapLayers}
-        showFilters={showFilters}
-        ambulanceFilter={ambulanceFilter}
-        onToggleLayer={onToggleLayer}
-        onToggleFilters={onToggleFilters}
-        onAmbulanceFilterChange={onAmbulanceFilterChange}
-      />
+      <Accordion type="multiple" defaultValue={['acciones', 'capas']} className="w-full">
+        <AccordionItem value="acciones" className="border-b">
+          <AccordionTrigger className="px-4 text-base font-semibold text-gray-800 hover:no-underline">
+            Acciones
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={onAddPointClick}
+            >
+              <MapPinPlus className="h-4 w-4 mr-2" />
+              Añadir Punto de Aterrizaje
+            </Button>
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="capas" className="border-b">
+          <AccordionTrigger className="px-4 text-base font-semibold text-gray-800 hover:no-underline">
+            Capas del Mapa
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4">
+            <MapLayers
+              mapLayers={mapLayers}
+              showFilters={showFilters}
+              ambulanceFilter={ambulanceFilter}
+              onToggleLayer={onToggleLayer}
+              onToggleFilters={onToggleFilters}
+              onAmbulanceFilterChange={onAmbulanceFilterChange}
+            />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       {/* Información de emergencia */}
       <EmergencyInfo

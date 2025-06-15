@@ -22,9 +22,9 @@ export const MapLayers: React.FC<MapLayersProps> = ({
   onAmbulanceFilterChange,
 }) => {
   return (
-    <div className="p-4 border-b border-gray-200">
+    <>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="font-semibold text-gray-800">Capas del Mapa</h2>
+        <h3 className="font-semibold text-gray-800">Visibilidad de Capas</h3>
         <Button
           variant="outline"
           size="sm"
@@ -68,6 +68,6 @@ export const MapLayers: React.FC<MapLayersProps> = ({
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
