@@ -17,9 +17,10 @@ type LocalData = {
   restricciones: string;
   soloDiurno: boolean;
   observaciones: string;
+  fotos: string[];
 };
 
-const LOCAL_STORAGE_KEY = "review-form-data-propuesta-punto";
+const LOCAL_STORAGE_KEY = "review-form-data-propuesta-punto-v2";
 
 function saveLocalData(data: LocalData) {
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
@@ -39,6 +40,7 @@ function loadLocalData(): LocalData {
       restricciones: "",
       soloDiurno: false,
       observaciones: "",
+      fotos: [],
     };
   }
   try {
@@ -55,6 +57,7 @@ function loadLocalData(): LocalData {
       restricciones: "",
       soloDiurno: false,
       observaciones: "",
+      fotos: [],
     };
   }
 }
@@ -71,14 +74,54 @@ export default function ReviewForm() {
   const currentUser = { email: "usuario@ejemplo.com" };
 
   const handleChange =
-    (field: keyof LocalData) =>
+    (field: keyof Omit<LocalData, "fotos">) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
       const value = e.target.type === "checkbox" ? (e.target as HTMLInputElement).checked : e.target.value;
       setLocal({ ...local, [field]: value });
     };
 
+  const handleFotosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const fileArray = Array.from(files);
+      const promises = fileArray.map(
+        file =>
+          new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          })
+      );
+      Promise.all(promises)
+        .then(fotosBase64 => {
+          setLocal(prev => ({
+            ...prev,
+            fotos: [...prev.fotos, ...fotosBase64],
+          }));
+          toast({
+            title: "Fotos añadidas",
+            description: `Se han añadido ${fotosBase64.length} foto(s).`,
+          });
+        })
+        .catch(() => {
+          toast({
+            variant: "destructive",
+            title: "Error con las fotos",
+            description: "No se han podido cargar las fotos seleccionadas.",
+          });
+        });
+    }
+  };
+
+  const handleFotoRemove = (idx: number) => {
+    setLocal(prev => ({
+      ...prev,
+      fotos: prev.fotos.filter((_, i) => i !== idx),
+    }));
+  };
+
   const handleSubmit = async () => {
-    // Validaciones simples para campos requeridos
     if (
       !local.nombrePunto ||
       !local.localidad ||
@@ -114,6 +157,7 @@ export default function ReviewForm() {
                 restricciones: local.restricciones,
                 soloDiurno: local.soloDiurno,
                 observaciones: local.observaciones,
+                fotos: local.fotos,
               },
             },
           }),
@@ -238,6 +282,36 @@ export default function ReviewForm() {
           onChange={handleChange("observaciones")}
           rows={2}
         />
+      </div>
+      <div>
+        <label className="block mb-1 font-bold">
+          Fotos de referencia
+        </label>
+        <Input
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={handleFotosChange}
+        />
+        <div className="grid grid-cols-3 gap-2 mt-2">
+          {local.fotos.map((foto, idx) => (
+            <div key={idx} className="relative">
+              <img
+                src={foto}
+                alt={`foto ${idx + 1}`}
+                className="rounded object-cover h-24 w-full border"
+              />
+              <button
+                type="button"
+                className="absolute top-1 right-1 bg-white rounded-full px-1 text-xs shadow border"
+                onClick={() => handleFotoRemove(idx)}
+                title="Eliminar foto"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
       <Button type="submit" disabled={loading} className="w-full">
         {loading ? "Enviando..." : "Enviar para revisión"}
