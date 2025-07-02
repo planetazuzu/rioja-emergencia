@@ -151,6 +151,18 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
     setFormError("");
     const pointData = createPointData(values);
     guardarBorrador(pointData);
+    onSave({
+      name: pointData.name,
+      locality: pointData.locality,
+      lat: pointData.lat,
+      lng: pointData.lng,
+      description: pointData.description,
+      status: pointData.status,
+      restrictions: pointData.restrictions || "Ninguna",
+      isDaytimeOnly: pointData.isDaytimeOnly,
+      createdBy: pointData.createdBy,
+      photos: pointData.photos,
+    });
     resetAll();
   };
 
@@ -167,6 +179,18 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
     }
     
     await enviarPropuesta(pointData);
+    onSave({
+      name: pointData.name,
+      locality: pointData.locality,
+      lat: pointData.lat,
+      lng: pointData.lng,
+      description: pointData.description,
+      status: pointData.status,
+      restrictions: pointData.restrictions || "Ninguna",
+      isDaytimeOnly: pointData.isDaytimeOnly,
+      createdBy: pointData.createdBy,
+      photos: pointData.photos,
+    });
   };
   
   const resetAll = () => {
