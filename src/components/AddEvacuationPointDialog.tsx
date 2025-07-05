@@ -178,7 +178,7 @@ export const AddEvacuationPointDialog: React.FC<AddEvacuationPointDialogProps> =
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="w-[95vw] max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Añadir/Proponer Punto de Aterrizaje</DialogTitle>
           <DialogDescription>
