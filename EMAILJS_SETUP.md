@@ -121,4 +121,4 @@ Puedes usar estas variables en tu plantilla de email:
 
 Si tienes problemas con la configuración:
 - Consulta la documentación de EmailJS: [https://www.emailjs.com/docs/](https://www.emailjs.com/docs/)
-- Contacta al equipo técnico: emergencias@larioja.org
+- Contacta al desarrollador: planetazuzu@gmail.com

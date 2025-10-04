@@ -167,9 +167,9 @@ VITE_MAP_API_KEY=tu_clave_de_mapas
 
 Para soporte técnico o reportar incidencias:
 
-- **Email**: emergencias@larioja.org
-- **Teléfono**: 941 291 100 (Emergencias La Rioja)
-- **Web**: [www.larioja.org](https://www.larioja.org)
+- **Email**: planetazuzu@gmail.com
+- **Teléfono**: 661 804 828
+- **Desarrollador**: Javier Fernández
 
 ## 📄 Licencia
 

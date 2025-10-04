@@ -16,7 +16,7 @@ export const EMAILJS_CONFIG = {
   PUBLIC_KEY: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY',
   
   // Email donde quieres recibir las propuestas de puntos de evacuación
-  RECIPIENT_EMAIL: 'emergencias@larioja.org',
+  RECIPIENT_EMAIL: 'planetazuzu@gmail.com',
 };
 
 // Función para verificar si EmailJS está configurado

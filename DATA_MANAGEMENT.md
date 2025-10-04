@@ -191,4 +191,4 @@ La aplicación:
 Si tienes problemas actualizando los datos:
 - Verifica que el JSON sea válido
 - Comprueba las coordenadas GPS
-- Contacta al equipo técnico: emergencias@larioja.org
+- Contacta al desarrollador: planetazuzu@gmail.com
