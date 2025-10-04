@@ -53,17 +53,24 @@ Sistema de Emergencias La Rioja
 2. Copia tu **Public Key**
 
 ### 5. Configurar la aplicación
-1. Abre el archivo `src/config/emailjs.ts`
-2. Reemplaza los valores:
+1. Crea un archivo `.env` en la raíz del proyecto
+2. Agrega tus credenciales de EmailJS:
 
-```typescript
-export const EMAILJS_CONFIG = {
-  SERVICE_ID: 'tu_service_id_aqui',
-  TEMPLATE_ID: 'tu_template_id_aqui', 
-  PUBLIC_KEY: 'tu_public_key_aqui',
-  RECIPIENT_EMAIL: 'emergencias@larioja.org',
-};
+```env
+# Configuración de EmailJS
+VITE_EMAILJS_SERVICE_ID=tu_service_id_aqui
+VITE_EMAILJS_TEMPLATE_ID=tu_template_id_aqui
+VITE_EMAILJS_PUBLIC_KEY=tu_public_key_aqui
 ```
+
+**Ejemplo con credenciales reales:**
+```env
+VITE_EMAILJS_SERVICE_ID=service_dt7ahat
+VITE_EMAILJS_TEMPLATE_ID=template_zxqmcne
+VITE_EMAILJS_PUBLIC_KEY=M6wPFkV0_TidqqLWF
+```
+
+**⚠️ Importante:** El archivo `.env` está en `.gitignore` para proteger tus credenciales. No lo subas al repositorio.
 
 ## 🔧 Variables disponibles en la plantilla
 

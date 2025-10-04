@@ -1,0 +1,92 @@
+{
+  "lastUpdated": "2025-01-04T14:57:00Z",
+  "version": "1.0.0",
+  "teams": [
+    {
+      "id": "eta-001",
+      "name": "ETA Logroño Centro",
+      "type": "medical",
+      "status": "available",
+      "location": {
+        "name": "Hospital San Pedro",
+        "lat": 42.4627,
+        "lng": -2.4449
+      },
+      "contact": {
+        "phone": "941 291 100",
+        "radio": "Canal 1"
+      },
+      "capabilities": [
+        "Rescate médico",
+        "Evacuación aérea",
+        "Soporte vital avanzado"
+      ],
+      "equipment": [
+        "Camilla aérea",
+        "Equipo de oxígeno",
+        "Desfibrilador"
+      ],
+      "crew": {
+        "pilot": "Juan Pérez",
+        "medic": "María García",
+        "technician": "Carlos López"
+      }
+    },
+    {
+      "id": "eta-002",
+      "name": "ETA La Rioja Norte",
+      "type": "medical", 
+      "status": "available",
+      "location": {
+        "name": "Hospital de Haro",
+        "lat": 42.5763,
+        "lng": -2.8474
+      },
+      "contact": {
+        "phone": "941 291 100",
+        "radio": "Canal 2"
+      },
+      "capabilities": [
+        "Rescate médico",
+        "Evacuación aérea",
+        "Soporte vital básico"
+      ],
+      "equipment": [
+        "Camilla aérea",
+        "Equipo de oxígeno"
+      ],
+      "crew": {
+        "pilot": "Ana Martín",
+        "medic": "Pedro Ruiz",
+        "technician": "Laura Sánchez"
+      }
+    },
+    {
+      "id": "eta-003",
+      "name": "ETA La Rioja Sur",
+      "type": "medical",
+      "status": "maintenance",
+      "location": {
+        "name": "Base de Calahorra",
+        "lat": 42.3031,
+        "lng": -1.9650
+      },
+      "contact": {
+        "phone": "941 291 100",
+        "radio": "Canal 3"
+      },
+      "capabilities": [
+        "Rescate médico",
+        "Evacuación aérea"
+      ],
+      "equipment": [
+        "Camilla aérea"
+      ],
+      "crew": {
+        "pilot": "Miguel Torres",
+        "medic": "Elena Vázquez",
+        "technician": "Roberto Jiménez"
+      }
+    }
+  ]
+}

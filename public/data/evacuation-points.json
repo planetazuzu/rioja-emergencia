@@ -1,0 +1,83 @@
+{
+  "lastUpdated": "2025-01-04T14:57:00Z",
+  "version": "1.0.0",
+  "points": [
+    {
+      "id": "ep-001",
+      "name": "Hospital San Pedro",
+      "locality": "Logroño",
+      "description": "Helipuerto principal del hospital con acceso 24h",
+      "lat": 42.4627,
+      "lng": -2.4449,
+      "status": "available",
+      "isDaytimeOnly": false,
+      "restrictions": "Acceso restringido durante emergencias",
+      "createdBy": "Sistema",
+      "photos": [],
+      "contact": {
+        "phone": "941 291 100",
+        "email": "emergencias@larioja.org"
+      },
+      "capacity": {
+        "maxHelicopters": 2,
+        "maxPeople": 50
+      },
+      "services": [
+        "Atención médica",
+        "Combustible",
+        "Comunicaciones"
+      ]
+    },
+    {
+      "id": "ep-002", 
+      "name": "Aeródromo de Agoncillo",
+      "locality": "Agoncillo",
+      "description": "Aeródromo militar con helipuerto disponible para emergencias",
+      "lat": 42.4567,
+      "lng": -2.2894,
+      "status": "available",
+      "isDaytimeOnly": true,
+      "restrictions": "Solo disponible con autorización previa",
+      "createdBy": "Sistema",
+      "photos": [],
+      "contact": {
+        "phone": "941 291 100",
+        "email": "emergencias@larioja.org"
+      },
+      "capacity": {
+        "maxHelicopters": 4,
+        "maxPeople": 100
+      },
+      "services": [
+        "Control aéreo",
+        "Combustible",
+        "Mantenimiento básico"
+      ]
+    },
+    {
+      "id": "ep-003",
+      "name": "Campo de fútbol de Haro",
+      "locality": "Haro", 
+      "description": "Campo de fútbol municipal adaptado para emergencias",
+      "lat": 42.5763,
+      "lng": -2.8474,
+      "status": "available",
+      "isDaytimeOnly": true,
+      "restrictions": "Solo para emergencias sanitarias",
+      "createdBy": "Sistema",
+      "photos": [],
+      "contact": {
+        "phone": "941 291 100",
+        "email": "emergencias@larioja.org"
+      },
+      "capacity": {
+        "maxHelicopters": 1,
+        "maxPeople": 30
+      },
+      "services": [
+        "Acceso vehicular",
+        "Iluminación básica"
+      ]
+    }
+  ]
+}

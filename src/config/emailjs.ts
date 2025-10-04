@@ -1,21 +1,19 @@
 // Configuración de EmailJS
-// Para configurar EmailJS:
-// 1. Ve a https://www.emailjs.com/
-// 2. Crea una cuenta gratuita
-// 3. Crea un servicio de email (Gmail, Outlook, etc.)
-// 4. Crea una plantilla de email
-// 5. Obtén tu Public Key
-// 6. Reemplaza los valores de abajo con tus credenciales reales
+// Las credenciales se cargan desde variables de entorno de Vite
+// Crea un archivo .env en la raíz del proyecto con:
+// VITE_EMAILJS_SERVICE_ID=tu_service_id
+// VITE_EMAILJS_TEMPLATE_ID=tu_template_id
+// VITE_EMAILJS_PUBLIC_KEY=tu_public_key
 
 export const EMAILJS_CONFIG = {
-  // Reemplaza con tu Service ID de EmailJS
-  SERVICE_ID: 'YOUR_SERVICE_ID',
+  // Service ID desde variable de entorno
+  SERVICE_ID: import.meta.env.VITE_EMAILJS_SERVICE_ID || 'YOUR_SERVICE_ID',
   
-  // Reemplaza con tu Template ID de EmailJS
-  TEMPLATE_ID: 'YOUR_TEMPLATE_ID',
+  // Template ID desde variable de entorno
+  TEMPLATE_ID: import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'YOUR_TEMPLATE_ID',
   
-  // Reemplaza con tu Public Key de EmailJS
-  PUBLIC_KEY: 'YOUR_PUBLIC_KEY',
+  // Public Key desde variable de entorno
+  PUBLIC_KEY: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY',
   
   // Email donde quieres recibir las propuestas de puntos de evacuación
   RECIPIENT_EMAIL: 'emergencias@larioja.org',
@@ -25,7 +23,10 @@ export const EMAILJS_CONFIG = {
 export const isEmailJSConfigured = (): boolean => {
   return EMAILJS_CONFIG.SERVICE_ID !== 'YOUR_SERVICE_ID' &&
          EMAILJS_CONFIG.TEMPLATE_ID !== 'YOUR_TEMPLATE_ID' &&
-         EMAILJS_CONFIG.PUBLIC_KEY !== 'YOUR_PUBLIC_KEY';
+         EMAILJS_CONFIG.PUBLIC_KEY !== 'YOUR_PUBLIC_KEY' &&
+         EMAILJS_CONFIG.SERVICE_ID !== undefined &&
+         EMAILJS_CONFIG.TEMPLATE_ID !== undefined &&
+         EMAILJS_CONFIG.PUBLIC_KEY !== undefined;
 };
 
 // Mensaje de error cuando EmailJS no está configurado
