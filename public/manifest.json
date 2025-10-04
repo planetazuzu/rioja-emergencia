@@ -1,21 +1,21 @@
 
 {
-  "name": "Emergencias Sanitarias La Rioja",
-  "short_name": "Emergencias LR",
-  "description": "Sistema de Gestión de Emergencias Sanitarias de La Rioja",
+  "name": "Mapa de Ubicaciones de Ambulancias - La Rioja",
+  "short_name": "Ambulancias LR",
+  "description": "Mapa interactivo con ubicaciones en tiempo real de ambulancias y servicios de emergencia en La Rioja",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#dc2626",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%23c41230'/><text x='50' y='60' font-size='40' text-anchor='middle' fill='white'>🚑</text></svg>",
+      "src": "/favicon.svg",
       "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%23c41230'/><text x='50' y='60' font-size='40' text-anchor='middle' fill='white'>🚑</text></svg>",
+      "src": "/favicon.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"

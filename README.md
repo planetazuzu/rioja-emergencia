@@ -47,8 +47,8 @@ Esta aplicación web proporciona herramientas especializadas para:
 
 3. **Iniciar el servidor de desarrollo**
    ```bash
-   npm run dev
-   ```
+npm run dev
+```
 
 4. **Acceder a la aplicación**
    - Abrir navegador en: `http://localhost:8080`
