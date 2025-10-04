@@ -175,12 +175,6 @@ Para soporte técnico o reportar incidencias:
 
 Este proyecto está desarrollado para la gestión de emergencias sanitarias de La Rioja. Todos los derechos reservados.
 
-## 🏛️ Instituciones
-
-**Gobierno de La Rioja**  
-Consejería de Salud  
-Servicio Riojano de Salud  
-
 ---
 
 *Sistema desarrollado para el seguimiento y coordinación de ambulancias y servicios de emergencia de La Rioja*
